@@ -1,23 +1,7 @@
 'use client'
 
-import { Chrono } from "react-chrono"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card"
 
-const items = [
-  {
-    title: "May 1940",
-    cardTitle: "Dunkirk",
-    url: "http://www.history.com",
-    cardSubtitle: "Men of the British Expeditionary Force (BEF) wade out to a destroyer...",
-    cardDetailedText: "Men of the British Expeditionary Force (BEF) wade out to a destroyer during the evacuation from Dunkirk.",
-    media: {
-      type: "IMAGE",
-      source: {
-        url: "http://someurl/image.jpg"
-      }
-    }
-  }
-]
 export default function Status() {
   return (
     <Card className="w-full">
@@ -45,7 +29,7 @@ function Timeline() {
   return (
     <div className="p-4 w-min flex flex-col items-center">
       {items.map((i, e) => (
-        <div className="h-full w-full flex flex-row gap-2 items-center">
+        <div key={e} className="h-full w-full flex flex-row gap-2 items-center">
           <div className={ `relative w-min h-full flex flex-col items-center justify-center ${ e != items.length - 1 && "after:bg-slate-400 after:absolute after:-translate-x-1/2 after:top-1/2 after:left-1/2 after:w-1 after:h-full after:content-['']" }` }>
             <div className="w-4 rounded-full h-4 bg-slate-400"></div>
           </div>

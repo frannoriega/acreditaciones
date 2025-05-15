@@ -1,5 +1,4 @@
 import Navbar from "@/components/shared/navbar";
-import { Button } from "@/components/ui/button";
 import { CreditCard, Info, Users } from "lucide-react";
 import { ThemeProvider } from "next-themes";
 import Link from "next/link";
@@ -35,7 +34,7 @@ export default async function UserLayout({
           <div className="dark:bg-slate-900 flex flex-col w-16 h-full items-start justify-start">
             {
               links.map(l => (
-                <SidebarItem href={l.href} selected={url === l.href}>
+                <SidebarItem key={l.href} href={l.href} selected={url === l.href}>
                   {l.icon}
                 </SidebarItem>
               ))

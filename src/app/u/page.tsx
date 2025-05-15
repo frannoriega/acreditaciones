@@ -1,4 +1,3 @@
-import { auth } from "@/auth"
 import InfoCard from "@/components/info-card"
 import Container from "@/components/shared/container"
 import Status from "@/components/status"

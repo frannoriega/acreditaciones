@@ -10,7 +10,7 @@ const users = [
   }
 ]
 
-async function getUser(id: number) {
+async function getUser() {
   return users[0]
 }
 

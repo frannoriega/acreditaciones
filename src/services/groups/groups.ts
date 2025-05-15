@@ -6,7 +6,7 @@ const groups = [
   }
 ]
 
-async function getGroup(id: number) {
+async function getGroup() {
   return groups[0]
 }
 

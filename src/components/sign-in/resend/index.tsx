@@ -1,12 +1,10 @@
 'use client'
-import { signIn } from "@/auth"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { FormEvent } from "react"
 import { signInWithEmail } from "@/services/auth"
 
 const formSchema = z.object({

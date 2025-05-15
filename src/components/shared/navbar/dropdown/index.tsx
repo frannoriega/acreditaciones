@@ -3,7 +3,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function ProfileDropdown({ avatar_url }: { avatar_url: string }) {
-  async function logout(_: Event) {
+  async function logout() {
     "use server"
     await signOut({
       redirectTo: "/",
