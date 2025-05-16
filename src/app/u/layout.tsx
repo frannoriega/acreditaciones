@@ -1,5 +1,6 @@
 import Navbar from "@/components/shared/navbar";
-import Sidebar from "@/components/shared/sidebar";
+import UserSidebar from "@/components/shared/sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { ThemeProvider } from "next-themes";
 
 export default function UserLayout({
@@ -9,14 +10,15 @@ export default function UserLayout({
 }) {
   return (
     <ThemeProvider attribute="class" enableSystem enableColorScheme disableTransitionOnChange>
-      <div className="flex flex-col h-full">
+      <SidebarProvider defaultOpen={false} className="w-full flex flex-col h-full">
         <Navbar />
-        <div className="flex flex-row w-full h-full items-start">
-          <Sidebar>
+        <div className="h-full w-full flex flex-row">
+          <UserSidebar />
+          <div className="flex flex-col h-full w-full items-center">
             {children}
-          </Sidebar>
+          </div>
         </div>
-      </div>
-    </ThemeProvider>
+      </SidebarProvider>
+    </ThemeProvider >
   )
 }

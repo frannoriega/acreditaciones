@@ -1,5 +1,6 @@
 'use client'
 
+import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail, useSidebar } from "@/components/ui/sidebar"
 import { CreditCard, Info, Users } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -7,42 +8,55 @@ import { usePathname } from "next/navigation"
 const links = [
   {
     href: "/u",
-    icon: <Info size={24} />
+    title: "Información",
+    icon: Info
   },
   {
     href: "/u/empleados",
-    icon: <Users size={24} />
+    title: "Empleados",
+    icon: Users
   },
   {
     href: "/u/pagos",
-    icon: <CreditCard size={24} />
+    title: "Pagos",
+    icon: CreditCard
   }
 ]
 
-export default function Sidebar({ children }: { children?: React.ReactNode }) {
+export default function UserSidebar() {
   const url = usePathname()
+  const { setOpen } = useSidebar()
   return (
-    <div className="flex flex-row w-full h-full items-start">
-      <div className="dark:bg-slate-900 flex flex-col w-16 h-full items-start justify-start">
-        {
-          links.map(l => (
-            <SidebarItem key={l.href} href={l.href} selected={url === l.href}>
-              {l.icon}
-            </SidebarItem>
-          ))
-        }
-      </div>
-      <div className="flex flex-col w-full items-center">
-        {children}
-      </div>
-    </div>
-  )
-}
-
-function SidebarItem({ children, href, selected }: { children: React.ReactNode, href: string, selected: boolean }) {
-  return (
-    <Link href={href} className={`w-full h-16 flex flex-col items-center justify-center ${selected ? "dark:bg-slate-800" : "dark:hover:bg-slate-800"}`}>
-      {children}
-    </Link>
+    <Sidebar collapsible="icon" className="relative h-full" onMouseOver={(e) => {
+      e.preventDefault()
+      setOpen(true)
+    }} onMouseOut={(e) => {
+      e.preventDefault()
+      setOpen(false)
+    }}>
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {
+                links.map(l => (
+                  <SidebarMenuItem key={l.href}>
+                    <SidebarMenuButton className={`h-full [&>svg]:size-6 ${url === l.href ? "dark:bg-slate-800" : "dark:hover:bg-slate-800"}`} asChild>
+                      <Link href={l.href}>
+                        {
+                          l.icon && <l.icon size={24} />
+                        }
+                        <span>{l.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))
+              }
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+      <SidebarRail />
+    </Sidebar>
   )
 }
