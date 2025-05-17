@@ -40,7 +40,7 @@ export function ResendSignIn() {
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full dark:bg-slate-900 text-slate-100">Iniciar sesión con email</Button>
+        <Button type="submit" className="w-full dark:bg-slate-900 text-slate-100" disabled>Iniciar sesión con email</Button>
       </form>
     </Form>
   )
