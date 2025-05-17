@@ -12,9 +12,9 @@ export default function UserLayout({
     <ThemeProvider attribute="class" enableSystem enableColorScheme disableTransitionOnChange>
       <SidebarProvider defaultOpen={false} className="w-full flex flex-col h-full">
         <Navbar />
-        <div className="h-full w-full flex flex-row">
+        <div className="min-h-screen w-full flex flex-row">
           <UserSidebar />
-          <div className="flex flex-col h-full w-full items-center">
+          <div className="flex flex-col w-full items-center">
             {children}
           </div>
         </div>

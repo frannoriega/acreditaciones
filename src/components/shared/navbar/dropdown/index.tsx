@@ -34,7 +34,7 @@ export default function ProfileDropdown({ avatar_url }: { avatar_url: string }) 
             <Link href="/u/pagos">Pagos</Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
-        <Separator orientation="horizontal" />
+        <Separator orientation="horizontal" className="md:hidden"/>
         <DropdownMenuItem onSelect={logout}>
           Cerrar sesión
         </DropdownMenuItem>
