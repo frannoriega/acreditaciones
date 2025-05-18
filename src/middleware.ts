@@ -1,28 +1,27 @@
-
-import NextAuth from "next-auth";
+// middleware.ts
 import { NextResponse } from "next/server";
-import authConfig from "./auth.config";
+import NextAuth from "next-auth";
+import { middlewareConfig } from "./auth.config";
 
-const middleware = NextAuth(authConfig).auth
- 
-export default middleware((req) => {
-  if (req.nextUrl.pathname.startsWith('/api/auth')) {
+export default NextAuth(middlewareConfig).auth((req) => {
+  const isAuthRoute = req.nextUrl.pathname === "/";
+  const isApiAuthRoute = req.nextUrl.pathname.startsWith("/api/auth");
+
+  console.log("middleware: ", req.auth)
+  console.log(isAuthRoute)
+  console.log(isApiAuthRoute)
+  if (isAuthRoute || isApiAuthRoute) {
     return NextResponse.next();
   }
-  if (!req.auth && req.nextUrl.pathname !== "/") {
-    const newUrl = new URL("/", req.nextUrl.origin)
-    return Response.redirect(newUrl)
-  }
-  const reqHeaders = new Headers(req.headers)
-  reqHeaders.set('x-url', req.nextUrl.pathname)
 
-  return NextResponse.next({
-    request: {
-      headers: reqHeaders
-    }
-  })
-})
+
+  if (!req.auth) {
+    return NextResponse.redirect(new URL("/", req.nextUrl.origin));
+  }
+
+  return NextResponse.next();
+});
 
 export const config = {
   matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
-}
+};

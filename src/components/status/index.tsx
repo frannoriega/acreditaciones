@@ -6,8 +6,8 @@ export default function Status() {
   return (
     <Card className="w-full flex flex-col items-center">
       <CardHeader className="w-full">
-        <CardTitle className="text-center text-2xl">La Familia</CardTitle>
-        <CardDescription className="text-center text-lg">Estado de su solicitud</CardDescription>
+        <CardTitle className="text-2xl">La Familia</CardTitle>
+        <CardDescription className="text-lg">Estado de su solicitud</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-row gap-4">
         <Timeline />
@@ -48,7 +48,7 @@ function Timeline() {
               <h1 className="font-bold">{i.title}</h1>
               <span className="text-muted-foreground">{i.date.toLocaleString("es-AR", { timeZone: "UTC", day: "numeric", month: "numeric", year: "numeric", hour: "numeric", minute: "numeric" })}</span>
             </div>
-            <p className="h-full w-full pb-8 whitespace-pre-line">
+            <p className="text-muted-foreground h-full w-full pb-8 whitespace-pre-line">
               {i.desc}
             </p>
           </div>

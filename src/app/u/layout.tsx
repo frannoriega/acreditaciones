@@ -1,12 +1,18 @@
+import { auth } from "@/auth";
 import Navbar from "@/components/shared/navbar";
 import UserSidebar from "@/components/shared/sidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { redirect } from "next/navigation";
 
-export default function UserLayout({
+export default async function UserLayout({
   children
 }: {
   children: React.ReactNode;
 }) {
+  const session = await auth();
+  if (!session) {
+    redirect("/")
+  }
   return (
     <SidebarProvider defaultOpen={false} className="w-full flex flex-col h-full">
       <Navbar />
