@@ -10,7 +10,6 @@ const baseConfig = {
   },
   callbacks: {
     authorized: async ({ auth }) => {
-      console.log("auth: ", auth)
       return !!auth
     },
     // signIn: async ({ user }) => {

@@ -7,9 +7,6 @@ export default NextAuth(middlewareConfig).auth((req) => {
   const isAuthRoute = req.nextUrl.pathname === "/";
   const isApiAuthRoute = req.nextUrl.pathname.startsWith("/api/auth");
 
-  console.log("middleware: ", req.auth)
-  console.log(isAuthRoute)
-  console.log(isApiAuthRoute)
   if (isAuthRoute || isApiAuthRoute) {
     return NextResponse.next();
   }

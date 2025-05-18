@@ -38,7 +38,7 @@ function Timeline() {
     <div className="px-4 w-full h-full flex flex-col items-center">
       {items.map((i, e) => (
         <div key={e} className="h-full w-full flex flex-row gap-6 items-start justify-center">
-          <div className={`relative w-min h-full flex flex-col items-center justify-start mt-1 ${e != items.length - 1 && "after:bg-slate-700 dark:after:bg-slate-400 after:absolute after:-translate-x-1/2 after:top-0 after:left-1/2 after:w-1 after:h-full after:content-['']"}`}>
+          <div className={`relative w-min h-full flex flex-col items-center justify-start mt-1 ${e != items.length - 1 && "after:bg-slate-700 dark:after:bg-slate-400 after:absolute after:-translate-x-1/2 after:top-1 after:left-1/2 after:w-1 after:h-full after:content-['']"}`}>
             <div className="z-10 w-5 rounded-full h-5 bg-slate-700 dark:bg-slate-400 flex flex-col items-center justify-center" >
               <div className={ `w-3 h-3 rounded-full z-10 bg-slate-50 dark:bg-slate-950` }/>
             </div>

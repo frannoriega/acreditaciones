@@ -39,7 +39,6 @@ export default function NewUserPage() {
 
   // STEP 3: Defining the submit function
   function onSubmit(values: z.infer<typeof newUserFormSchema>) {
-    console.log(values)
     formContext.updateUserData(values)
 
     router.push('/nuevo/' + values.type)
