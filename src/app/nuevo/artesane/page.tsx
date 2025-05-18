@@ -6,7 +6,7 @@ import { Form, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useNewUserFormContext } from "@/hooks/use-new-user-form-context";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -18,6 +18,11 @@ const newArtisanFormSchema = z.object({
 export default function ArtisanSignUpPage() {
   const router = useRouter()
   const formContext = useNewUserFormContext()
+
+  if (!formContext.user) {
+    redirect('/nuevo')
+  }
+
   const form = useForm<z.infer<typeof newArtisanFormSchema>>({
     resolver: zodResolver(newArtisanFormSchema),
     mode: 'onChange'
@@ -29,8 +34,11 @@ export default function ArtisanSignUpPage() {
     }
     formContext.updateUserData(val)
 
+    console.log("submit form", formContext.user)
+
     router.push('/u/')
   }
+
 
   return (
     <Container className="w-full flex flex-col items-center pt-16">
