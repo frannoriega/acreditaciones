@@ -46,7 +46,7 @@ export default function NewUserPage() {
 
   return (
     <Container className="w-full flex flex-col items-center pt-16">
-      <Card className="w-fit">
+      <Card className="min-w-1/2">
         <CardHeader className="w-full">
           <CardTitle className="text-center">Inscripción</CardTitle>
           <CardDescription className="sr-only">Formulario de inscripción</CardDescription>
@@ -58,7 +58,7 @@ export default function NewUserPage() {
                 control={form.control}
                 name="type"
                 render={({ field }) => (
-                  <FormItem className="flex flex-col w-full items-center gap-4">
+                  <FormItem className="flex flex-col w-full items-start gap-4">
                     <FormLabel>Seleccione el tipo de acreditación</FormLabel>
                     <Select onValueChange={field.onChange}>
                       <FormControl>

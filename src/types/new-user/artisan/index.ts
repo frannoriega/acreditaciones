@@ -1,6 +1,6 @@
 type ArtisanSignUp = {
   name: string,
-  cathegory: string // TODO: Make enum
+  type: 'artesane' | 'manualista' // TODO: Make enum
   // TODO: Complete
 }
 

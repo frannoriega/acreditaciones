@@ -2,8 +2,9 @@
 import Container from "@/components/shared/container";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormField, FormItem, FormLabel } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useNewUserFormContext } from "@/hooks/use-new-user-form-context";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { redirect, useRouter } from "next/navigation";
@@ -11,8 +12,9 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 const newArtisanFormSchema = z.object({
-  name: z.string(),
-  cathegory: z.string()
+  name: z.string().min(3, "Lala"),
+  lastname: z.string().min(3, "Lele"),
+  type: z.enum(['artesane', 'manualista'])
 })
 
 export default function ArtisanSignUpPage() {
@@ -42,7 +44,7 @@ export default function ArtisanSignUpPage() {
 
   return (
     <Container className="w-full flex flex-col items-center pt-16">
-      <Card className="md:min-w-96 flex flex-col">
+      <Card className="min-w-2/3 flex flex-col">
         <CardHeader className="w-full">
           <CardTitle className="w-full">
             <h1 className="w-full text-center">
@@ -52,29 +54,59 @@ export default function ArtisanSignUpPage() {
           <CardDescription className="sr-only">Formulario de inscripción como artesane</CardDescription>
         </CardHeader>
         <CardContent>
+          <div>
+            <h1 className="font-semibold">Requisitos</h1>
+            <p></p>
+          </div>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="w-full flex flex-col items-center gap-4">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="w-full grid grid-cols-2 items-start gap-2">
               <FormField
                 control={form.control}
                 name='name'
                 render={({ field }) => (
                   <FormItem className="w-full">
                     <FormLabel>Nombre</FormLabel>
-                    <Input onChange={field.onChange}></Input>
+                    <FormControl>
+                      <Input onChange={field.onChange}></Input>
+                    </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
               <FormField
                 control={form.control}
-                name='cathegory'
+                name='lastname'
                 render={({ field }) => (
                   <FormItem className="w-full">
-                    <FormLabel>Tipo</FormLabel>
-                    <Input onChange={field.onChange}></Input>
+                    <FormLabel>Apellido</FormLabel>
+                    <FormControl>
+                      <Input onChange={field.onChange}></Input>
+                    </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
-              <Button type="submit">Enviar</Button>
+              <FormField
+                control={form.control}
+                name='type'
+                render={({ field }) => (
+                  <FormItem className="w-full self-start">
+                    <FormLabel>Tipo</FormLabel>
+                    <Select onValueChange={field.onChange}>
+                      <FormControl>
+                        <SelectTrigger className="w-full mr-4">
+                          <SelectValue placeholder="Trabajo" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="artesane">Artesane</SelectItem>
+                        <SelectItem value="manualista">Manualista</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormItem>
+                )}
+              />
+              <Button type="submit" className="mt-4 col-start-1">Enviar</Button>
             </form>
           </Form>
         </CardContent>
