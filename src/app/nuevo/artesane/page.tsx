@@ -59,7 +59,7 @@ export default function ArtisanSignUpPage() {
             <p></p>
           </div>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="w-full grid grid-cols-2 items-start gap-2">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="w-full grid grid-cols-2 items-start gap-4">
               <FormField
                 control={form.control}
                 name='name'

@@ -2,7 +2,7 @@ import { NewUser } from "@/types/new-user"
 import { createContext, useState } from "react"
 
 export interface UserContextProps {
-  user: NewUser | null,
+  user: Partial<NewUser> | null,
   updateUserData: (property: Partial<NewUser>) => void
 }
 
@@ -12,11 +12,11 @@ export const NewUserFormContext = createContext<UserContextProps | null>({
 })
 
 export function UserFormContextProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<NewUser | null>(null)
+  const [user, setUser] = useState<Partial<NewUser> | null>(null)
 
   // adding this code 👇🏽
   const updateUserData = (values: Partial<NewUser>) => {
-    setUser({ ...user, ...values })
+    setUser((user) => { return { ...user, ...values }})
   }
 
   return (

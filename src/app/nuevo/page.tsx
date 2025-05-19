@@ -4,6 +4,7 @@ import Container from "@/components/shared/container"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form"
+import { Progress } from "@/components/ui/progress"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useNewUserFormContext } from "@/hooks/use-new-user-form-context"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -45,8 +46,12 @@ export default function NewUserPage() {
   }
 
   return (
-    <Container className="w-full flex flex-col items-center pt-16">
-      <Card className="min-w-1/2">
+    <Container className="w-full flex flex-col items-center pt-2">
+      <div className="relative w-full">
+        <Progress value={33}/>
+        <div className="size-4 bg-red-500 absolute top-0 left-1/3" />
+      </div>
+      <Card className="min-w-1/2 w-full">
         <CardHeader className="w-full">
           <CardTitle className="text-center">Inscripción</CardTitle>
           <CardDescription className="sr-only">Formulario de inscripción</CardDescription>
