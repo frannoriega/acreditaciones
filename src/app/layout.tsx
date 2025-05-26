@@ -26,7 +26,7 @@ export default function RootLayout({
   return (
     <html lang="es" className="h-full" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} self-stretch antialiased flex flex-col min-h-full h-full items-stretch justify-stretch justify-items-stretch`}
+        className={`${geistSans.variable} ${geistMono.variable} self-stretch antialiased flex flex-col w-full min-h-full h-full items-stretch justify-stretch justify-items-stretch`}
       >
         <ThemeProvider attribute="class" enableSystem enableColorScheme disableTransitionOnChange>
           {children}

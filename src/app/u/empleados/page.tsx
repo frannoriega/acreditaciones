@@ -1,5 +1,5 @@
-import Container from "@/components/shared/container";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Container from "@/components/atoms/container";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/atoms/ui/card";
 
 export default function EmpleadosPage() {
   return (

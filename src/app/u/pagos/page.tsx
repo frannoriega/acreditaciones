@@ -1,4 +1,4 @@
-import Container from "@/components/shared/container";
+import Container from "@/components/atoms/container";
 
 export default function EmpleadosPage() {
   return (

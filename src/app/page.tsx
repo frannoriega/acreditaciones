@@ -1,5 +1,5 @@
-import Logo from "@/components/shared/logo";
-import SignIn from "@/components/sign-in";
+import Logo from "@/components/atoms/logo";
+import SignIn from "@/components/molecules/sign-in";
 
 export default function Home() {
   return (

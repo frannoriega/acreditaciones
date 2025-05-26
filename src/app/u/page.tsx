@@ -1,5 +1,5 @@
-import Container from "@/components/shared/container"
-import Status from "@/components/status"
+import Container from "@/components/atoms/container";
+import Status from "@/components/molecules/status";
 
 
 export default async function UserPage() {
