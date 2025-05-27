@@ -20,7 +20,7 @@ const items = [
   }
 ]
 
-function MultiSelect({ children }: React.ComponentProps<"div">) {
+function MultiSelect() {
   const [selected, setSelected] = useState<MultiSet<{ label: string, value: string, bg: string }>>(new MultiSet())
   const [open, setOpen] = useState(false)
 
@@ -29,7 +29,7 @@ function MultiSelect({ children }: React.ComponentProps<"div">) {
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button variant="outline">
-            Seleccione los instrumentos
+            Ver músicos
           </Button>
         </PopoverTrigger>
         <PopoverContent>

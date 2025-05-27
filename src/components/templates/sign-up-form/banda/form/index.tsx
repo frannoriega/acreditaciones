@@ -5,37 +5,72 @@ import { Input } from "@/components/atoms/ui/input";
 import { Separator } from "@/components/atoms/ui/separator";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/atoms/ui/tooltip";
 import { MultiSelect } from "@/components/molecules/multi-select";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { Info } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { z } from "zod/v4";
 
 const newBandFormSchema = z.object({
   name: z.string().regex(/^[a-zA-Z0-9]*$/, "Sólo se permite caracteres alfanuméricos").min(3, "Ingrese al menos 3 caracteres"),
-  musicians: z.number({ message: "Ingrese un número" }).gte(1, "Debe haber al menos un músico"),
-  support: z.number({
+  support: z.coerce.number({
     message: "Ingrese un número"
-  }).gte(0),
+  }).nonnegative("Ingrese un número positivo"),
   instruments: z.array(
     z.enum(["guitarra", "teclado"])
   ),
-  fee: z.number({
+  fee: z.coerce.number({
     message: "Ingrese un número"
-  }).gte(0, "Ingrese un número positivo"),
-  rider: z.instanceof(File)
-    .refine(files => !files || files.size > 0, "Cargue un archivo")
+  }).nonnegative("Ingrese un número positivo"),
+  rider: z.file()
 })
 
-export default function BandSignUpForm() {
+type BandSignUpFormProps = {
+  onProgress?: ({ step, total }: { step: number, total: number }) => void
+}
+
+export default function BandSignUpForm({ onProgress }: BandSignUpFormProps) {
+  const [valid, setValid] = useState<Set<string>>(new Set())
   const form = useForm<z.infer<typeof newBandFormSchema>>({
-    resolver: zodResolver(newBandFormSchema),
+    resolver: standardSchemaResolver(newBandFormSchema),
     defaultValues: {
       name: "",
-      musicians: 2,
       support: 0,
       fee: 0
-    }
+    },
+    mode: 'onChange'
   })
+
+  const totalSteps = Object.keys(form.getValues()).length
+
+  useEffect(() => {
+    const suscription = form.watch((f, { name }) => {
+      if (!name) {
+        return
+      }
+      if (form.getFieldState(name).invalid) {
+        setValid(valids => {
+          const newValids = new Set(valids)
+          newValids.delete(name)
+          return newValids
+        })
+      } else {
+        setValid(valids => {
+          const newValids = new Set(valids)
+          return newValids.add(name)
+        })
+      }
+
+    })
+    return () => suscription.unsubscribe()
+  }, [form])
+
+  useEffect(() => {
+    if (onProgress) {
+      onProgress({ step: valid.size, total: totalSteps })
+    }
+  }, [valid, onProgress, totalSteps])
+
 
   function onSubmit(values: z.infer<typeof newBandFormSchema>) {
     console.log(values)
@@ -67,7 +102,7 @@ export default function BandSignUpForm() {
           <FormField
             name="instruments"
             control={form.control}
-            render={({ field }) => (
+            render={() => (
               <FormItem className="w-full flex flex-col gap-2">
                 <FormLabel>Seleccione los integrantes</FormLabel>
                 <FormControl>
@@ -97,7 +132,7 @@ export default function BandSignUpForm() {
                   </Tooltip>
                 </FormLabel>
                 <FormControl>
-                  <Input {...field} onChange={val => field.onChange(val.currentTarget.valueAsNumber)} type="number" />
+                  <Input {...field} type="number" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -119,7 +154,7 @@ export default function BandSignUpForm() {
                     <div className="rounded-l-md bg-input h-full min-w-8 flex items-center justify-center boder-input border-t border-l border-b">
                       <span>$</span>
                     </div>
-                    <Input {...field} onChange={val => field.onChange(val.currentTarget.valueAsNumber)} type="number" className="rounded-l-none rounded-r0md" />
+                    <Input {...field} onInput={field.onChange} type="number" className="rounded-l-none rounded-r0md" />
                   </div>
                 </FormControl>
                 <FormMessage />
@@ -134,7 +169,7 @@ export default function BandSignUpForm() {
               <FormItem className="w-full">
                 <FormLabel>Rider técnico</FormLabel>
                 <FormControl>
-                  <Input type="file" {...field}/>
+                  <Input type="file" onInput={field.onChange} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

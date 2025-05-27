@@ -72,7 +72,7 @@ export default function CircularProgress({
           strokeDashoffset={percentage}
           fill="transparent"
           strokeDasharray={circumference}
-          className={cn("stroke-primary", progressClassName)}
+          className={cn("stroke-primary ease-in-out duration-800", progressClassName)}
         />
       </svg>
       {showLabel && (

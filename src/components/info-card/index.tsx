@@ -1,5 +1,5 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
-import { Separator } from "../ui/separator";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/atoms/ui/card";
+import { Separator } from "@/components/atoms/ui/separator";
 import AdminInfo from "./admin-info";
 
 export default async function InfoCard({ className }: React.ComponentProps<typeof Card>) {

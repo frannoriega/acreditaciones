@@ -7,6 +7,11 @@ import BandSignUpForm from "./banda";
 
 export default function SignUpForm() {
   const [signupType, setSignupType] = useState<string | null>(null)
+  const [progress, setProgress] = useState(0)
+
+  function onProgress({ step, total }: { step: number, total: number}) {
+    setProgress(Math.ceil((step / total)*100))
+  }
 
   return (
     <Card className="min-w-1/2 w-full backdrop-blur-lg bg-card/80">
@@ -17,7 +22,7 @@ export default function SignUpForm() {
       <CardContent className="flex flex-row gap-4">
         <div className="w-fit sticky top-0 h-fit">
           <CircularProgress
-            value={20}
+            value={progress}
             showLabel
             renderLabel={(progress) => `${progress}%`}
             labelClassName="text-xl font-bold"
@@ -40,7 +45,7 @@ export default function SignUpForm() {
               </SelectContent>
             </Select>
           </div>
-          {signupType === "banda" && <BandSignUpForm />}
+          {signupType === "banda" && <BandSignUpForm onProgress={onProgress} />}
         </div>
       </CardContent>
     </Card>

@@ -1,7 +1,7 @@
 'use client'
 import { useForm } from "react-hook-form"
 import { z } from "zod"
-import { zodResolver } from "@hookform/resolvers/zod"
+import { standardSchemaResolver } from "@hookform/resolvers/standard-schema"
 import { Form, FormControl, FormField, FormItem } from "@/components/atoms/ui/form"
 import { Button } from "@/components/atoms/ui/button"
 import { Input } from "@/components/atoms/ui/input"
@@ -13,7 +13,7 @@ const formSchema = z.object({
 
 export function ResendSignIn() {
   const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+    resolver: standardSchemaResolver(formSchema),
     defaultValues: {
       email: ""
     }
