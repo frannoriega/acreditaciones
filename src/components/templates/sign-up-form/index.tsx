@@ -1,19 +1,9 @@
-import Lipsum from "@/components/atoms/lipsum";
-import { Button } from "@/components/atoms/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/atoms/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/atoms/ui/form";
 import { Label } from "@/components/atoms/ui/label";
-import { Select, SelectContent, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/atoms/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/atoms/ui/select";
 import CircularProgress from "@/components/molecules/circular-progress";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useCallback, useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { useState } from "react";
 import BandSignUpForm from "./banda";
-
-const newUserFormSchema = z.object({
-  type: z.enum(['banda', 'gastronomico', 'artesane', 'prensa']),
-})
 
 export default function SignUpForm() {
   const [signupType, setSignupType] = useState<string | null>(null)
