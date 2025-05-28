@@ -3,6 +3,7 @@ import { Button } from "@/components/atoms/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/atoms/ui/form";
 import { Input } from "@/components/atoms/ui/input";
 import { Separator } from "@/components/atoms/ui/separator";
+import { Textarea } from "@/components/atoms/ui/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/atoms/ui/tooltip";
 import { MultiSelect } from "@/components/molecules/multi-select";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
@@ -13,11 +14,19 @@ import { z } from "zod/v4";
 
 const newBandFormSchema = z.object({
   name: z.string().regex(/^[a-zA-Z0-9]*$/, "Sólo se permite caracteres alfanuméricos").min(3, "Ingrese al menos 3 caracteres"),
+  bio: z.string().nonempty("Ingrese una biografía").max(500),
+  gender: z.enum(["cumbia", "rock"]),
+  discography: z.array(
+    z.object({
+      name: z.string().nonempty(),
+      release_date: z.date()
+    })
+  ),
   support: z.coerce.number({
     message: "Ingrese un número"
   }).nonnegative("Ingrese un número positivo"),
   instruments: z.array(
-    z.enum(["guitarra", "teclado"])
+    z.enum(["guitar", "keyboard"])
   ),
   fee: z.coerce.number({
     message: "Ingrese un número"
@@ -30,7 +39,8 @@ type BandSignUpFormProps = {
 }
 
 export default function BandSignUpForm({ onProgress }: BandSignUpFormProps) {
-  const [valid, setValid] = useState<Set<string>>(new Set())
+  const [valid, setValid] = useState(0)
+  const [bioLength, setBioLength] = useState(0)
   const form = useForm<z.infer<typeof newBandFormSchema>>({
     resolver: standardSchemaResolver(newBandFormSchema),
     defaultValues: {
@@ -44,32 +54,37 @@ export default function BandSignUpForm({ onProgress }: BandSignUpFormProps) {
   const totalSteps = Object.keys(form.getValues()).length
 
   useEffect(() => {
-    const suscription = form.watch((f, { name }) => {
-      if (!name) {
-        return
+    const callback = form.subscribe({
+      formState: {
+        dirtyFields: true,
+        errors: true
+      },
+      callback: ({ dirtyFields, errors }) => {
+          setValid(Object.keys(dirtyFields ?? {}).length - Object.keys(errors ?? {}).length)
       }
-      if (form.getFieldState(name).invalid) {
-        setValid(valids => {
-          const newValids = new Set(valids)
-          newValids.delete(name)
-          return newValids
-        })
-      } else {
-        setValid(valids => {
-          const newValids = new Set(valids)
-          return newValids.add(name)
-        })
-      }
-
     })
-    return () => suscription.unsubscribe()
+    return () => callback()
   }, [form])
 
   useEffect(() => {
     if (onProgress) {
-      onProgress({ step: valid.size, total: totalSteps })
+      onProgress({ step: valid, total: totalSteps })
     }
   }, [valid, onProgress, totalSteps])
+
+  useEffect(() => {
+    const callback = form.subscribe({
+      formState: {
+        values: true
+      },
+      name: "bio",
+      callback: ({ values }) => {
+        setBioLength(values.bio.length)
+      }
+    })
+
+    return () => callback()
+  }, [form])
 
 
   function onSubmit(values: z.infer<typeof newBandFormSchema>) {
@@ -80,7 +95,7 @@ export default function BandSignUpForm({ onProgress }: BandSignUpFormProps) {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
         <section className="flex flex-col gap-4">
-          <h1 className="text-lg font-semibold w-full">Información</h1>
+          <h1 className="text-lg font-semibold w-full">Acerca de la banda</h1>
           <FormField
             name="name"
             control={form.control}
@@ -91,6 +106,23 @@ export default function BandSignUpForm({ onProgress }: BandSignUpFormProps) {
                   <Input {...field} />
                 </FormControl>
                 <FormMessage />
+              </FormItem>
+
+            )}
+          />
+          <FormField
+            name="bio"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem className="w-full flex flex-col gap-2">
+                <FormLabel>Biografía</FormLabel>
+                <FormControl >
+                  <Textarea {...field} maxLength={500} className="flex-wrap w-full break-after-all"/>
+                </FormControl>
+                <div className="flex flex-row">
+                  <FormMessage className="w-full"/>
+                  <span className="w-full text-right text-sm text-muted-foreground">Caracteres {bioLength}/500</span>
+                </div>
               </FormItem>
 
             )}
