@@ -2,7 +2,7 @@ import BandSignUpForm from "./form";
 import BandRequirements from "./requirements";
 
 type BandSignUpProps = {
-  onProgress?: ({ step, total }: { step: number, total: number}) => void
+  onProgress?: (progress: number) => void
 }
 
 export default function BandSignUp({ onProgress }: BandSignUpProps) {

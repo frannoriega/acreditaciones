@@ -4,7 +4,7 @@ import { Button } from "@/components/atoms/ui/button"
 import { Command, CommandInput, CommandItem, CommandList } from "@/components/atoms/ui/command"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/atoms/ui/popover"
 import { CircleX } from "lucide-react"
-import { useState } from "react"
+import {  useEffect, useState } from "react"
 import { MultiSet } from "mnemonist"
 
 const items = [
@@ -20,8 +20,18 @@ const items = [
   }
 ]
 
-function MultiSelect() {
-  const [selected, setSelected] = useState<MultiSet<{ label: string, value: string, bg: string }>>(new MultiSet())
+type MultiSelectProps = {
+  onValueChange: (vals: Map<string, number>) => void
+}
+
+function MultiSelect({ onValueChange }: MultiSelectProps) {
+  const [selected, setSelected] = useState<MultiSet<{ label: string, value: string, bg: string }>>(new MultiSet());
+  const [values, setValues] = useState<Map<string, number>>(new Map())
+
+  useEffect(() => {
+    onValueChange(values)
+  }, [onValueChange, values])
+
   const [open, setOpen] = useState(false)
 
   return (
@@ -29,22 +39,30 @@ function MultiSelect() {
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button variant="outline">
-            Ver músicos
+            Agregar músicos
           </Button>
         </PopoverTrigger>
         <PopoverContent>
           <Command>
             <CommandInput placeholder="Buscar..." />
             <CommandList className="w-56">
-              {items.map((i, e) => (
-                <CommandItem key={e} onSelect={() => {
-                  setSelected(sel => {
-                    const newSet = MultiSet.from(sel.values())
-                    newSet.add(i)
-                    return newSet
+              {items.map((item, index) => (
+                <CommandItem key={index} onSelect={() => {
+                  const newSet = MultiSet.from(selected.values());
+                  newSet.add(item);
+                  setSelected(newSet);
+                  setValues(map => {
+                    const newMap = new Map(map)
+                    if (newMap.has(item.value)) {
+                      const old = newMap.get(item.value)
+                      newMap.set(item.value, (old ?? 0) + 1)
+                    } else {
+                      newMap.set(item.value, 1)
+                    }
+                    return newMap
                   })
                 }}>
-                  {i.label}
+                  {item.label}
                 </CommandItem>
               ))}
             </CommandList>
@@ -59,11 +77,23 @@ function MultiSelect() {
                 {item.label}
               </span>
               <Button
-                onClick={() => setSelected(sel => {
-                  const newSet = MultiSet.from(sel.values())
-                  newSet.remove(item)
-                  return newSet
-                })}
+                type="button"
+                onClick={() => {
+                  const newSet = MultiSet.from(selected.values());
+                  newSet.remove(item);
+                  setSelected(newSet);
+                  setValues(map => {
+                    const newMap = new Map(map)
+                    if (newMap.has(item.value)) {
+                      const old = newMap.get(item.value)
+                      newMap.set(item.value, (old ?? 1) - 1)
+                    } else {
+                      newMap.set(item.value, 0)
+                    }
+                    return newMap
+                  })
+                }
+                }
                 className="w-4 h-4 p-0 m-0 bg-transparent"
               >
                 <CircleX className="w-4 h-4" />

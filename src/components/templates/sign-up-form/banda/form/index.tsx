@@ -2,14 +2,15 @@
 import { Button } from "@/components/atoms/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/atoms/ui/form";
 import { Input } from "@/components/atoms/ui/input";
+import { Label } from "@/components/atoms/ui/label";
 import { Separator } from "@/components/atoms/ui/separator";
 import { Textarea } from "@/components/atoms/ui/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/atoms/ui/tooltip";
 import { MultiSelect } from "@/components/molecules/multi-select";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
-import { Info } from "lucide-react";
+import { CircleX, Info } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod/v4";
 
 const newBandFormSchema = z.object({
@@ -19,15 +20,16 @@ const newBandFormSchema = z.object({
   discography: z.array(
     z.object({
       name: z.string().nonempty(),
-      release_date: z.date()
+      release_date: z.coerce.number().min(1930).max(new Date().getFullYear())
     })
   ),
   support: z.coerce.number({
     message: "Ingrese un número"
   }).nonnegative("Ingrese un número positivo"),
-  instruments: z.array(
-    z.enum(["guitar", "keyboard"])
-  ),
+  instruments: z.map(
+    z.enum(["guitar", "keyboard"]),
+    z.number()
+  ).refine(m => m.size == 0 || m.values().some(v => v > 0), { error: "Seleccione al menos un músico" }),
   fee: z.coerce.number({
     message: "Ingrese un número"
   }).nonnegative("Ingrese un número positivo"),
@@ -35,60 +37,43 @@ const newBandFormSchema = z.object({
 })
 
 type BandSignUpFormProps = {
-  onProgress?: ({ step, total }: { step: number, total: number }) => void
+  onProgress?: (progress: number) => void
 }
 
-export default function BandSignUpForm({ onProgress }: BandSignUpFormProps) {
-  const [valid, setValid] = useState(0)
+export default function BandSignUpForm({ }: BandSignUpFormProps) {
   const [bioLength, setBioLength] = useState(0)
+  const defaultValues = {
+    name: "",
+    bio: "",
+    gender: undefined,
+    support: 0,
+    fee: 0,
+    instruments: new Map(),
+    discography: [],
+    rider: undefined
+  }
   const form = useForm<z.infer<typeof newBandFormSchema>>({
     resolver: standardSchemaResolver(newBandFormSchema),
-    defaultValues: {
-      name: "",
-      support: 0,
-      fee: 0
-    },
-    mode: 'onChange'
+    defaultValues,
+    mode: 'onChange',
+    reValidateMode: 'onChange'
   })
 
-  const totalSteps = Object.keys(form.getValues()).length
+  const { fields, append, remove } = useFieldArray({
+    name: "discography",
+    control: form.control,
+  })
 
+  // Efficient bio length tracking
   useEffect(() => {
-    const callback = form.subscribe({
-      formState: {
-        dirtyFields: true,
-        errors: true
-      },
-      callback: ({ dirtyFields, errors }) => {
-          setValid(Object.keys(dirtyFields ?? {}).length - Object.keys(errors ?? {}).length)
-      }
-    })
-    return () => callback()
-  }, [form])
-
-  useEffect(() => {
-    if (onProgress) {
-      onProgress({ step: valid, total: totalSteps })
-    }
-  }, [valid, onProgress, totalSteps])
-
-  useEffect(() => {
-    const callback = form.subscribe({
-      formState: {
-        values: true
-      },
-      name: "bio",
-      callback: ({ values }) => {
-        setBioLength(values.bio.length)
-      }
-    })
-
-    return () => callback()
-  }, [form])
-
+    const subscription = form.watch((value) => {
+      setBioLength(value.bio?.length || 0);
+    });
+    return () => subscription.unsubscribe();
+  }, [form]);
 
   function onSubmit(values: z.infer<typeof newBandFormSchema>) {
-    console.log(values)
+    console.log(values);
   }
 
   return (
@@ -117,16 +102,52 @@ export default function BandSignUpForm({ onProgress }: BandSignUpFormProps) {
               <FormItem className="w-full flex flex-col gap-2">
                 <FormLabel>Biografía</FormLabel>
                 <FormControl >
-                  <Textarea {...field} maxLength={500} className="flex-wrap w-full break-after-all"/>
+                  <Textarea {...field} maxLength={500} className="flex-wrap w-full break-after-all" />
                 </FormControl>
                 <div className="flex flex-row">
-                  <FormMessage className="w-full"/>
+                  <FormMessage className="w-full" />
                   <span className="w-full text-right text-sm text-muted-foreground">Caracteres {bioLength}/500</span>
                 </div>
               </FormItem>
 
             )}
           />
+          <Label>Discografía</Label>
+          {fields.map((field, index) => (
+            <div key={field.id} className="flex flex-row items-start w-full gap-4">
+              <FormField
+                name={`discography.${index}.name`}
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem className="w-full flex flex-col justify-end gap-2">
+                    <FormLabel>Nombre</FormLabel>
+                    <FormControl >
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage className="w-full" />
+                  </FormItem>
+
+                )}
+              />
+              <FormField
+                name={`discography.${index}.release_date`}
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem className="w-1/2 flex flex-col gap-2">
+                    <FormLabel>Año de lanzamiento</FormLabel>
+                    <FormControl >
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage className="w-full" />
+                  </FormItem>
+
+                )}
+              />
+              <Button className="mt-5" onClick={() => remove(index)}><CircleX className="w-6 h-6" /></Button>
+            </div>
+          ))
+          }
+          <Button type="button" onClick={() => append({ name: "", release_date: new Date().getFullYear() })}>Agregar disco</Button>
         </section>
         <Separator orientation="horizontal" />
         <section className="flex flex-col items-start w-full gap-4">
@@ -134,14 +155,18 @@ export default function BandSignUpForm({ onProgress }: BandSignUpFormProps) {
           <FormField
             name="instruments"
             control={form.control}
-            render={() => (
+            render={({ field }) => (
               <FormItem className="w-full flex flex-col gap-2">
                 <FormLabel>Seleccione los integrantes</FormLabel>
                 <FormControl>
-                  <MultiSelect />
+                  <MultiSelect
+                    onValueChange={field.onChange}
+                  />
                 </FormControl>
+                <FormMessage />
               </FormItem>
-            )}
+            )
+            }
           />
           <FormField
             name="support"
@@ -201,14 +226,21 @@ export default function BandSignUpForm({ onProgress }: BandSignUpFormProps) {
               <FormItem className="w-full">
                 <FormLabel>Rider técnico</FormLabel>
                 <FormControl>
-                  <Input type="file" onInput={field.onChange} />
+                  <Input
+                    type="file"
+                    onChange={(e) => field.onChange(e.target.files?.[0])} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
         </section>
-        <Button type="submit">Enviar</Button>
+        <div className="flex flex-col w-full gap-4 items-center">
+          <Separator orientation="horizontal" />
+          <div className="flex flex-row w-full gap-4 items-center">
+            <Button type="submit" className="w-full">Enviar</Button>
+          </div>
+        </div>
       </form>
     </Form>
   )
