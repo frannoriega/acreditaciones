@@ -208,11 +208,11 @@ export default function BandSignUpForm({ }: BandSignUpFormProps) {
               <FormItem className="w-full">
                 <FormLabel>Costo del cachét</FormLabel>
                 <FormControl>
-                  <div className="rounded-md overflow-hidden flex flex-row items-center">
-                    <div className="rounded-l-md bg-input h-full min-w-8 flex items-center justify-center boder-input border-t border-l border-b">
-                      <span>$</span>
-                    </div>
-                    <Input {...field} onInput={field.onChange} type="number" className="rounded-l-none rounded-r0md" />
+                  <div className="relative ">
+                      <div className="absolute overflow-hidden left-0 bg-input rounded-l-md  h-full min-w-8 flex items-center justify-center">
+                        <span className="hover:cursor-default">$</span>
+                      </div>
+                    <Input {...field} type="number" className="relative pl-10" />
                   </div>
                 </FormControl>
                 <FormMessage />
