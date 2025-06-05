@@ -60,7 +60,7 @@ export default function FileInput({ showFiles, ...props }: FileInputProps) {
               <span>{files}</span>
               <CircleCheck />
             </div> :
-            <p>Arrastra y suelta aquí los archivos para cargarlos, o haz click aquí</p>
+            <p>Arrastra y suelta el archivo para cargarlo, o haz click aquí</p>
           :
           <div className='flex flex-col items-center'>
             <Plus />
