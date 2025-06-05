@@ -1,4 +1,5 @@
 'use client'
+import FileInput from "@/components/atoms/file-input";
 import { Button } from "@/components/atoms/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/atoms/ui/form";
 import { Input } from "@/components/atoms/ui/input";
@@ -226,8 +227,8 @@ export default function BandSignUpForm({ }: BandSignUpFormProps) {
               <FormItem className="w-full">
                 <FormLabel>Rider técnico</FormLabel>
                 <FormControl>
-                  <Input
-                    type="file"
+                  <FileInput
+                    className="min-h-20 text-current bg-input/30 rounded-lg flex flex-col items-center justify-center outline-dashed outline-input outline-2 -outline-offset-8 hover:bg-input"
                     onChange={(e) => field.onChange(e.target.files?.[0])} />
                 </FormControl>
                 <FormMessage />
