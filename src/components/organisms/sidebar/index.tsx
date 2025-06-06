@@ -27,14 +27,14 @@ export default function UserSidebar() {
   const url = usePathname()
   const { setOpen } = useSidebar()
   return (
-    <Sidebar collapsible="icon" className="relative h-full group" onMouseOver={(e) => {
+    <Sidebar collapsible="icon" className="static h-full" onMouseEnter={(e) => {
       e.preventDefault()
       setOpen(true)
-    }} onMouseOut={(e) => {
+    }} onMouseLeave={(e) => {
       e.preventDefault()
       setOpen(false)
     }}>
-      <SidebarContent>
+      <SidebarContent className="ease-in-out">
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
