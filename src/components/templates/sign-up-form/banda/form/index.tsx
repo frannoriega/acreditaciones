@@ -4,12 +4,13 @@ import { Button } from "@/components/atoms/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/atoms/ui/form";
 import { Input } from "@/components/atoms/ui/input";
 import { Label } from "@/components/atoms/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/atoms/ui/select";
 import { Separator } from "@/components/atoms/ui/separator";
 import { Textarea } from "@/components/atoms/ui/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/atoms/ui/tooltip";
 import { MultiSelect } from "@/components/molecules/multi-select";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
-import { CircleX, Info } from "lucide-react";
+import { Info, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod/v4";
@@ -17,24 +18,28 @@ import { z } from "zod/v4";
 const newBandFormSchema = z.object({
   name: z.string().regex(/^[a-zA-Z0-9]*$/, "Sólo se permite caracteres alfanuméricos").min(3, "Ingrese al menos 3 caracteres"),
   bio: z.string().nonempty("Ingrese una biografía").max(500),
-  gender: z.enum(["cumbia", "rock"]),
+  gender: z.enum(["cumbia", "rock"], "Seleccione un género"),
   discography: z.array(
     z.object({
-      name: z.string().nonempty(),
-      release_date: z.coerce.number().min(1930).max(new Date().getFullYear())
+      name: z.string().nonempty("Ingrese un nombre para el disco"),
+      release_date: z.coerce.number("Ingrese un número").min(1930, "Ingrese un año mayor a 1930").max(new Date().getFullYear(), "Ingrese un año actual o pasado")
     })
   ),
   support: z.coerce.number({
-    message: "Ingrese un número"
+    error: "Ingrese un número"
   }).nonnegative("Ingrese un número positivo"),
   instruments: z.map(
     z.enum(["guitar", "keyboard"]),
     z.number()
   ).refine(m => m.size == 0 || m.values().some(v => v > 0), { error: "Seleccione al menos un músico" }),
   fee: z.coerce.number({
-    message: "Ingrese un número"
+    error: "Ingrese un número"
   }).nonnegative("Ingrese un número positivo"),
-  rider: z.file()
+  rider: z.file({
+    error: "Ingrese un archivo"
+  }),
+  backline: z.file("Ingrese un archivo en formato PDF o imagen"),
+  stage: z.file("Ingrese un archivo en formato PDF o imagen"),
 })
 
 type BandSignUpFormProps = {
@@ -51,7 +56,9 @@ export default function BandSignUpForm({ }: BandSignUpFormProps) {
     fee: 0,
     instruments: new Map(),
     discography: [],
-    rider: undefined
+    rider: undefined,
+    backline: undefined,
+    stage: undefined,
   }
   const form = useForm<z.infer<typeof newBandFormSchema>>({
     resolver: standardSchemaResolver(newBandFormSchema),
@@ -82,20 +89,44 @@ export default function BandSignUpForm({ }: BandSignUpFormProps) {
       <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
         <section className="flex flex-col gap-4">
           <h1 className="text-lg font-semibold w-full">Acerca de la banda</h1>
-          <FormField
-            name="name"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem className="w-full flex flex-col gap-2">
-                <FormLabel>Nombre de la agrupación</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+          <div className="flex flex-row gap-4">
+            <FormField
+              name="name"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem className="w-full flex flex-col gap-2">
+                  <FormLabel>Nombre de la agrupación</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
 
-            )}
-          />
+              )}
+            />
+            <FormField
+              name="gender"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem className="w-1/4 flex flex-col gap-2">
+                  <FormLabel>Género</FormLabel>
+                  <FormControl >
+                    <Select onValueChange={val => field.onChange(val)} defaultValue={field.value}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Seleccione el género"/>
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="rock">Rock</SelectItem>
+                        <SelectItem value="cumbia">Cumbia</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+
+              )}
+            />
+          </div>
           <FormField
             name="bio"
             control={form.control}
@@ -144,7 +175,7 @@ export default function BandSignUpForm({ }: BandSignUpFormProps) {
 
                 )}
               />
-              <Button className="mt-5" onClick={() => remove(index)}><CircleX className="w-6 h-6" /></Button>
+              <Button className="mt-[22px]" variant="destructive" onClick={() => remove(index)}><Trash2 className="w-6 h-6" /></Button>
             </div>
           ))
           }
@@ -209,9 +240,9 @@ export default function BandSignUpForm({ }: BandSignUpFormProps) {
                 <FormLabel>Costo del cachét</FormLabel>
                 <FormControl>
                   <div className="relative ">
-                      <div className="absolute overflow-hidden left-0 bg-input rounded-l-md  h-full min-w-8 flex items-center justify-center">
-                        <span className="hover:cursor-default">$</span>
-                      </div>
+                    <div className="absolute overflow-hidden left-0 bg-input rounded-l-md  h-full min-w-8 flex items-center justify-center">
+                      <span className="hover:cursor-default">$</span>
+                    </div>
                     <Input {...field} type="number" className="relative pl-10" />
                   </div>
                 </FormControl>
@@ -226,6 +257,36 @@ export default function BandSignUpForm({ }: BandSignUpFormProps) {
             render={({ field }) => (
               <FormItem className="w-full">
                 <FormLabel>Rider técnico</FormLabel>
+                <FormControl>
+                  <FileInput
+                    className="min-h-20 text-current bg-input/30 rounded-lg flex flex-col items-center justify-center outline-dashed outline-input outline-2 -outline-offset-8 hover:bg-input"
+                    onChange={(e) => field.onChange(e.target.files?.[0])} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            name="backline"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem className="w-full">
+                <FormLabel>Backline</FormLabel>
+                <FormControl>
+                  <FileInput
+                    className="min-h-20 text-current bg-input/30 rounded-lg flex flex-col items-center justify-center outline-dashed outline-input outline-2 -outline-offset-8 hover:bg-input"
+                    onChange={(e) => field.onChange(e.target.files?.[0])} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            name="stage"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem className="w-full">
+                <FormLabel>Plano de escenario</FormLabel>
                 <FormControl>
                   <FileInput
                     className="min-h-20 text-current bg-input/30 rounded-lg flex flex-col items-center justify-center outline-dashed outline-input outline-2 -outline-offset-8 hover:bg-input"
