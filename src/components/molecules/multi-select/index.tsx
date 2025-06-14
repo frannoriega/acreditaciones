@@ -42,10 +42,10 @@ function MultiSelect({ onValueChange }: MultiSelectProps) {
             Agregar músicos
           </Button>
         </PopoverTrigger>
-        <PopoverContent>
+        <PopoverContent className="p-2">
           <Command>
             <CommandInput placeholder="Buscar..." />
-            <CommandList className="w-56">
+            <CommandList className="pt-2 w-full">
               {items.map((item, index) => (
                 <CommandItem key={index} onSelect={() => {
                   const newSet = MultiSet.from(selected.values());
@@ -61,7 +61,7 @@ function MultiSelect({ onValueChange }: MultiSelectProps) {
                     }
                     return newMap
                   })
-                }}>
+                }} className="w-full">
                   {item.label}
                 </CommandItem>
               ))}
