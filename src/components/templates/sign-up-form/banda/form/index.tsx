@@ -1,5 +1,6 @@
 'use client'
 import FileInput from "@/components/atoms/file-input";
+import { SearchableSelect, SearchableSelectContent, SearchableSelectEmpty, SearchableSelectInput, SearchableSelectItem, SearchableSelectList, SearchableSelectTrigger, SearchableSelectValue } from "@/components/atoms/searchable-select";
 import { Button } from "@/components/atoms/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/atoms/ui/form";
 import { Input } from "@/components/atoms/ui/input";
@@ -10,7 +11,7 @@ import { Textarea } from "@/components/atoms/ui/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/atoms/ui/tooltip";
 import { MultiSelect } from "@/components/molecules/multi-select";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
-import { Info, Trash2 } from "lucide-react";
+import {  Info, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod/v4";
@@ -111,15 +112,21 @@ export default function BandSignUpForm({ }: BandSignUpFormProps) {
                 <FormItem className="w-1/4 flex flex-col gap-2">
                   <FormLabel>Género</FormLabel>
                   <FormControl >
-                    <Select onValueChange={val => field.onChange(val)} defaultValue={field.value}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Seleccione el género"/>
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="rock">Rock</SelectItem>
-                        <SelectItem value="cumbia">Cumbia</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <SearchableSelect onValueChange={field.onChange} defaultValue={field.value}>
+                      <SearchableSelectTrigger>
+                        <SearchableSelectValue placeholder="Seleccione el género"/>
+                      </SearchableSelectTrigger>
+                      <SearchableSelectContent>
+                        <SearchableSelectInput placeholder="Buscar..."/>
+                        <SearchableSelectList>
+                          <SearchableSelectEmpty >
+                            No se encontraron resultados.
+                          </ SearchableSelectEmpty>
+                          <SearchableSelectItem value="rock">Rock</SearchableSelectItem>
+                          <SearchableSelectItem value="cumbia">Cumbia</SearchableSelectItem>
+                        </SearchableSelectList>
+                      </SearchableSelectContent>
+                    </SearchableSelect>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
