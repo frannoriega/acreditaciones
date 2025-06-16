@@ -3,7 +3,11 @@ import { Button } from "@/components/atoms/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/atoms/ui/dialog";
 import { ScrollArea } from "@/components/atoms/ui/scroll-area";
 
-export default function BandRequirements() {
+type RequirementProps = {
+  type: "press" | "foodtruck" | "artisan" | "band"
+}
+
+export default function Requirements({ type }: RequirementProps) {
   return (
     <Dialog>
       <DialogTrigger asChild>

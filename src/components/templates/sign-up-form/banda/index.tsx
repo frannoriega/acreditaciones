@@ -1,5 +1,5 @@
+import Requirements from "../requirements";
 import BandSignUpForm from "./form";
-import BandRequirements from "./requirements";
 
 type BandSignUpProps = {
   onProgress?: (progress: number) => void
@@ -8,7 +8,7 @@ type BandSignUpProps = {
 export default function BandSignUp({ onProgress }: BandSignUpProps) {
   return (
     <div className="flex flex-col gap-4">
-      <BandRequirements />
+      <Requirements type="band" />
       <BandSignUpForm onProgress={onProgress} />
     </div>
   )

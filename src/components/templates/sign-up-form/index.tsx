@@ -2,7 +2,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/atoms/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/atoms/ui/select";
 import { useState } from "react";
-import BandSignUpForm from "./banda";
+import FoodtruckSignUp from "./foodtruck";
+import BandSignUp from "./banda";
 
 export default function SignUpForm() {
   const [signupType, setSignupType] = useState<string | null>(null)
@@ -29,7 +30,8 @@ export default function SignUpForm() {
               </SelectContent>
             </Select>
           </div>
-          {signupType === "banda" && <BandSignUpForm onProgress={() => {}} />}
+          {signupType === "banda" && <BandSignUp onProgress={() => {}} />}
+          {signupType === "gastronomico" && <FoodtruckSignUp onProgress={() => {}} />}
         </div>
       </CardContent>
     </Card>
