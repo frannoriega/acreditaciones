@@ -1,20 +1,31 @@
 'use client'
 import FileInput from "@/components/atoms/file-input";
-import { SearchableSelect, SearchableSelectContent, SearchableSelectEmpty, SearchableSelectInput, SearchableSelectItem, SearchableSelectList, SearchableSelectTrigger, SearchableSelectValue } from "@/components/atoms/searchable-select";
 import { Button } from "@/components/atoms/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/atoms/ui/form";
-import { Input } from "@/components/atoms/ui/input";
-import { Label } from "@/components/atoms/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/atoms/ui/select";
 import { Separator } from "@/components/atoms/ui/separator";
-import { Textarea } from "@/components/atoms/ui/textarea";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/atoms/ui/tooltip";
-import { MultiSelect } from "@/components/molecules/multi-select";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
-import {  Info, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useFieldArray, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { z } from "zod/v4";
+import NameField from "./fields/about/name";
+import GenderField from "./fields/about/gender";
+import BioField from "./fields/about/bio";
+import DiscographyField from "./fields/about/discography";
+import InstrumentsField from "./fields/members/instruments";
+import SupportField from "./fields/members/support";
+import FeeField from "./fields/stage/fee";
+import StageField from "./fields/stage/stage";
+
+const stageSchema = z.object({
+  coords: z.object({
+    x: z.number().nonnegative(),
+    y: z.number().nonnegative()
+  }),
+  data: z.object({
+    rider: z.string(),
+    backline: z.string(),
+    io: z.string().optional(),
+  })
+})
 
 const newBandFormSchema = z.object({
   name: z.string().regex(/^[a-zA-Z0-9]*$/, "Sólo se permite caracteres alfanuméricos").min(3, "Ingrese al menos 3 caracteres"),
@@ -40,7 +51,9 @@ const newBandFormSchema = z.object({
     error: "Ingrese un archivo"
   }),
   backline: z.file("Ingrese un archivo en formato PDF o imagen"),
-  stage: z.file("Ingrese un archivo en formato PDF o imagen"),
+  stage: z.array(
+    stageSchema
+  ),
 })
 
 type BandSignUpFormProps = {
@@ -48,7 +61,6 @@ type BandSignUpFormProps = {
 }
 
 export default function BandSignUpForm({ }: BandSignUpFormProps) {
-  const [bioLength, setBioLength] = useState(0)
   const defaultValues = {
     name: "",
     bio: "",
@@ -61,6 +73,7 @@ export default function BandSignUpForm({ }: BandSignUpFormProps) {
     backline: undefined,
     stage: undefined,
   }
+
   const form = useForm<z.infer<typeof newBandFormSchema>>({
     resolver: standardSchemaResolver(newBandFormSchema),
     defaultValues,
@@ -68,18 +81,6 @@ export default function BandSignUpForm({ }: BandSignUpFormProps) {
     reValidateMode: 'onChange'
   })
 
-  const { fields, append, remove } = useFieldArray({
-    name: "discography",
-    control: form.control,
-  })
-
-  // Efficient bio length tracking
-  useEffect(() => {
-    const subscription = form.watch((value) => {
-      setBioLength(value.bio?.length || 0);
-    });
-    return () => subscription.unsubscribe();
-  }, [form]);
 
   function onSubmit(values: z.infer<typeof newBandFormSchema>) {
     console.log(values);
@@ -91,173 +92,23 @@ export default function BandSignUpForm({ }: BandSignUpFormProps) {
         <section className="flex flex-col gap-4">
           <h1 className="text-lg font-semibold w-full">Acerca de la banda</h1>
           <div className="flex flex-row gap-4">
-            <FormField
-              name="name"
-              control={form.control}
-              render={({ field }) => (
-                <FormItem className="w-full flex flex-col gap-2">
-                  <FormLabel>Nombre de la agrupación</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-
-              )}
-            />
-            <FormField
-              name="gender"
-              control={form.control}
-              render={({ field }) => (
-                <FormItem className="w-1/4 flex flex-col gap-2">
-                  <FormLabel>Género</FormLabel>
-                  <FormControl >
-                    <SearchableSelect onValueChange={field.onChange} defaultValue={field.value}>
-                      <SearchableSelectTrigger>
-                        <SearchableSelectValue placeholder="Seleccione el género"/>
-                      </SearchableSelectTrigger>
-                      <SearchableSelectContent>
-                        <SearchableSelectInput placeholder="Buscar..."/>
-                        <SearchableSelectList>
-                          <SearchableSelectEmpty >
-                            No se encontraron resultados.
-                          </ SearchableSelectEmpty>
-                          <SearchableSelectItem value="rock">Rock</SearchableSelectItem>
-                          <SearchableSelectItem value="cumbia">Cumbia</SearchableSelectItem>
-                        </SearchableSelectList>
-                      </SearchableSelectContent>
-                    </SearchableSelect>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-
-              )}
-            />
+            <NameField className="w-full flex flex-col gap-2" />
+            <GenderField className="w-1/4 flex flex-col gap-2" />
           </div>
-          <FormField
-            name="bio"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem className="w-full flex flex-col gap-2">
-                <FormLabel>Biografía</FormLabel>
-                <FormControl >
-                  <Textarea {...field} maxLength={500} className="flex-wrap w-full break-after-all" />
-                </FormControl>
-                <div className="flex flex-row">
-                  <FormMessage className="w-full" />
-                  <span className="w-full text-right text-sm text-muted-foreground">Caracteres {bioLength}/500</span>
-                </div>
-              </FormItem>
-
-            )}
-          />
-          <Label>Discografía</Label>
-          {fields.map((field, index) => (
-            <div key={field.id} className="flex flex-row items-start w-full gap-4">
-              <FormField
-                name={`discography.${index}.name`}
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem className="w-full flex flex-col justify-end gap-2">
-                    <FormLabel>Nombre</FormLabel>
-                    <FormControl >
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage className="w-full" />
-                  </FormItem>
-
-                )}
-              />
-              <FormField
-                name={`discography.${index}.release_date`}
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem className="w-1/2 flex flex-col gap-2">
-                    <FormLabel>Año de lanzamiento</FormLabel>
-                    <FormControl >
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage className="w-full" />
-                  </FormItem>
-
-                )}
-              />
-              <Button className="mt-[22px]" variant="destructive" onClick={() => remove(index)}><Trash2 className="w-6 h-6" /></Button>
-            </div>
-          ))
-          }
-          <Button type="button" onClick={() => append({ name: "", release_date: new Date().getFullYear() })}>Agregar disco</Button>
+          <BioField className="w-full flex flex-col gap-2" />
+          <DiscographyField className="flex flex-row items-start w-full gap-4" />
         </section>
         <Separator orientation="horizontal" />
         <section className="flex flex-col items-start w-full gap-4">
           <h1 className="text-lg font-semibold w-full">Integrantes</h1>
-          <FormField
-            name="instruments"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem className="w-full flex flex-col gap-2">
-                <FormLabel>Seleccione los integrantes</FormLabel>
-                <FormControl>
-                  <MultiSelect
-                    onValueChange={field.onChange}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )
-            }
-          />
-          <FormField
-            name="support"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>
-                  <span>
-                    Cantidad de empleados
-                  </span>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Info className="w-4 h-4" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <span>
-                        Fotógrafos, sonidistas, etc.
-                      </span>
-                    </TooltipContent>
-                  </Tooltip>
-                </FormLabel>
-                <FormControl>
-                  <Input {...field} type="number" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-
-            )}
-          />
+          <InstrumentsField className="w-full flex flex-col gap-2" />
+          <SupportField className="w-full"/>
         </section>
         <Separator orientation="horizontal" />
         <section className="flex flex-col gap-4">
           <h1 className="text-lg font-semibold w-full">Técnica</h1>
-          <FormField
-            name="fee"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>Costo del cachét</FormLabel>
-                <FormControl>
-                  <div className="relative ">
-                    <div className="absolute overflow-hidden left-0 bg-input rounded-l-md  h-full min-w-8 flex items-center justify-center">
-                      <span className="hover:cursor-default">$</span>
-                    </div>
-                    <Input {...field} type="number" className="relative pl-10" />
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-
-            )}
-          />
+          <FeeField className="w-full"/>
+          <StageField />
           <FormField
             name="rider"
             control={form.control}
@@ -279,21 +130,6 @@ export default function BandSignUpForm({ }: BandSignUpFormProps) {
             render={({ field }) => (
               <FormItem className="w-full">
                 <FormLabel>Backline</FormLabel>
-                <FormControl>
-                  <FileInput
-                    className="min-h-20 text-current bg-input/30 rounded-lg flex flex-col items-center justify-center outline-dashed outline-input outline-2 -outline-offset-8 hover:bg-input"
-                    onChange={(e) => field.onChange(e.target.files?.[0])} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            name="stage"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>Plano de escenario</FormLabel>
                 <FormControl>
                   <FileInput
                     className="min-h-20 text-current bg-input/30 rounded-lg flex flex-col items-center justify-center outline-dashed outline-input outline-2 -outline-offset-8 hover:bg-input"
