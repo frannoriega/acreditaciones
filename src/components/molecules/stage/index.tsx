@@ -1,0 +1,258 @@
+import React, { useState, useRef, useEffect } from 'react';
+import { Dialog, DialogContent } from '@/components/atoms/ui/dialog';
+import { DialogTitle } from '@radix-ui/react-dialog';
+
+interface Coords {
+  x: number;
+  y: number;
+}
+
+interface StagePoint<T> {
+  coords: Coords,
+  data: T;
+}
+
+interface StageProps<T> {
+  width?: number;
+  height?: number;
+  meter?: number;
+  defaultValues: T;
+  onPointsChange?: (points: StagePoint<T>[]) => void;
+  children?: React.ReactNode;
+  renderPoint?: (point: StagePoint<T>, index: number) => React.ReactNode;
+  renderModal?: (props: {
+    point: StagePoint<T>;
+    onSave: (data: T) => void;
+    onRemove: () => void;
+    onClose: () => void;
+  }) => React.ReactNode;
+  className?: string;
+  style?: React.CSSProperties;
+}
+
+export function Stage<T>({
+  width = 1024,
+  height = 630,
+  meter = 66.4,
+  defaultValues,
+  onPointsChange,
+  children,
+  renderPoint,
+  renderModal,
+  className,
+  style,
+}: StageProps<T>) {
+  const [points, setPoints] = useState<StagePoint<T>[]>([]);
+  const [activePoint, setActivePoint] = useState<StagePoint<T> | null>(null);
+  const [open, setOpen] = useState(false);
+  const [mousePosition, setMousePosition] = useState<{ x: number, y: number } | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const guideCanvasRef = useRef<HTMLCanvasElement>(null);
+
+  // Sync points with parent when they change
+  useEffect(() => {
+    console.log(points)
+    onPointsChange?.(points);
+  }, [points, onPointsChange]);
+
+  const handleCanvasMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    setMousePosition({ x, y });
+
+    // Draw guide lines
+    const guideCanvas = guideCanvasRef.current;
+    if (!guideCanvas) return;
+
+    const ctx = guideCanvas.getContext('2d');
+    if (!ctx) return;
+
+    // Clear previous frame
+    ctx.clearRect(0, 0, width, height);
+
+    // Set guide line style
+    ctx.strokeStyle = 'rgba(0, 0, 255, 0.5)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([5, 5]);
+    ctx.font = '18px Arial';
+    ctx.fillStyle = 'blue';
+
+    // Draw vertical guide line (x-axis)
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, height);
+    ctx.stroke();
+
+    // Draw horizontal guide line (y-axis)
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(width, y);
+    ctx.stroke();
+
+    // Draw x coordinate text
+    ctx.fillText(`${(x / meter).toFixed(2)}mts`, x + 5, 15);
+
+    // Draw y coordinate text
+    ctx.fillText(`${(y / meter).toFixed(2)}mts`, 5, y - 5);
+  };
+
+  const handleCanvasMouseLeave = () => {
+    setMousePosition(null);
+    const guideCanvas = guideCanvasRef.current;
+    if (!guideCanvas) return;
+
+    const ctx = guideCanvas.getContext('2d');
+    if (!ctx) return;
+
+    ctx.clearRect(0, 0, width, height);
+  };
+
+  const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (!mousePosition) return;
+
+    const { x, y } = mousePosition;
+
+    // Check if we clicked on an existing point
+    const clickedPointIndex = points.findIndex(point => {
+      return Math.sqrt((point.coords.x - x) ** 2 + (point.coords.y - y) ** 2) < 20;
+    });
+
+    if (clickedPointIndex >= 0) {
+      setActivePoint(points[clickedPointIndex]);
+    } else {
+      setActivePoint({
+        coords: {
+          x,
+          y
+        },
+        data: defaultValues
+      });
+    };
+
+    setOpen(true);
+  }
+
+  const handleRemovePoint = (index: number) => {
+    const newPoints = [...points];
+    newPoints.splice(index, 1);
+    setPoints(newPoints);
+  }
+
+  const handleAddPoint = (data: T) => {
+    if (!activePoint) return;
+
+    console.log(activePoint)
+    console.log(points)
+    console.log(data)
+    const pointIdx = points.findIndex(p => p.coords.x === activePoint.coords.x && p.coords.y === activePoint.coords.y)
+
+    if (pointIdx < 0) {
+      const newPoint: StagePoint<T> = {
+        coords: {
+          x: activePoint.coords.x,
+          y: activePoint.coords.y,
+        },
+        data,
+      };
+
+      setPoints(prev => [...prev, newPoint]);
+    } else {
+      setPoints(prev => {
+        const newPoints = [...prev]
+        newPoints[pointIdx].data = data
+        return newPoints
+      })
+    }
+
+    setOpen(false);
+  };
+
+  const defaultRenderPoint = (point: StagePoint<T>, index: number) => (
+    <button
+      key={`${point.coords.x}-${point.coords.y}-${index}`}
+      className='absolute bg-[#F229D9]/70 flex items-center justify-center cursor-pointer text-4xl w-min h-min rounded-full p-2'
+      style={{
+        position: 'absolute',
+        left: point.coords.x,
+        top: point.coords.y,
+        boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+      }}
+      title={`Point ${index + 1} (Click to remove)`}
+      onClick={(e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        setActivePoint(point)
+        setOpen(true)
+      }}
+    >
+      🎹
+    </button>
+  );
+
+  return (
+    <div
+      className={className}
+      style={{
+        position: 'relative',
+        width: `${width}px`,
+        ...style,
+      }}
+    >
+      <canvas
+        ref={canvasRef}
+        width={width}
+        height={height}
+        onClick={handleCanvasClick}
+        onMouseMove={handleCanvasMouseMove}
+        onMouseLeave={handleCanvasMouseLeave}
+        style={{
+          cursor: 'crosshair',
+        }}
+      />
+      <canvas
+        ref={guideCanvasRef}
+        width={width}
+        height={height}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          pointerEvents: 'none',
+          zIndex: 2,
+        }}
+      />
+
+      {points.map((point, index) => (
+        <React.Fragment key={`${point.coords.x}-${point.coords.y}-${index}`}>
+          {renderPoint
+            ? renderPoint(point, index)
+            : defaultRenderPoint(point, index)}
+        </React.Fragment>
+      ))}
+
+      {open && activePoint && renderModal && (
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogContent>
+            <DialogTitle>Titulo</DialogTitle>
+            {renderModal({
+              point: activePoint,
+              onSave: handleAddPoint,
+              onRemove: () => {
+
+              },
+              onClose: () => setOpen(false),
+            })}
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {children}
+    </div>
+  );
+}
