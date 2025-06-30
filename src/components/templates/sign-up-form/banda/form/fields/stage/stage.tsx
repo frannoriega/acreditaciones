@@ -186,8 +186,8 @@ function PointForm({ data, onSave, onClose }: PointFormProps<z.infer<typeof stag
               <FormControl>
                 <DynamicInputList
                   label="Rider"
-                  values={field.value}
-                  onChange={field.onChange}
+                  name="rider"
+                  control={stageForm.control}
                   placeholder="Ej: 2 micrófonos Shure SM58"
                 />
               </FormControl>
@@ -204,8 +204,8 @@ function PointForm({ data, onSave, onClose }: PointFormProps<z.infer<typeof stag
               <FormControl>
                 <DynamicInputList
                   label="Backline"
-                  values={field.value}
-                  onChange={field.onChange}
+                  name="backline"
+                  control={stageForm.control}
                   placeholder="Ej: Amplificador Marshall JCM800"
                 />
               </FormControl>
@@ -222,8 +222,8 @@ function PointForm({ data, onSave, onClose }: PointFormProps<z.infer<typeof stag
               <FormControl>
                 <DynamicInputList
                   label="I/O"
-                  values={field.value}
-                  onChange={field.onChange}
+                  name="io"
+                  control={stageForm.control}
                   placeholder="Ej: Canal 1 - Guitarra eléctrica"
                 />
               </FormControl>
