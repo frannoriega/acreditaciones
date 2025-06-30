@@ -98,47 +98,19 @@ export default function BandSignUpForm({ }: BandSignUpFormProps) {
           <BioField className="w-full flex flex-col gap-2" />
           <DiscographyField className="flex flex-row items-start w-full gap-4" />
         </section>
-        <Separator orientation="horizontal" />
-        <section className="flex flex-col items-start w-full gap-4">
-          <h1 className="text-lg font-semibold w-full">Integrantes</h1>
-          <InstrumentsField className="w-full flex flex-col gap-2" />
-          <SupportField className="w-full"/>
-        </section>
+        {
+          // <Separator orientation="horizontal" />
+          // <section className="flex flex-col items-start w-full gap-4">
+          //   <h1 className="text-lg font-semibold w-full">Integrantes</h1>
+          //   <InstrumentsField className="w-full flex flex-col gap-2" />
+          // </section>
+        }
         <Separator orientation="horizontal" />
         <section className="flex flex-col gap-4">
           <h1 className="text-lg font-semibold w-full">Técnica</h1>
+          <SupportField className="w-full"/>
           <FeeField className="w-full"/>
           <StageField />
-          <FormField
-            name="rider"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>Rider técnico</FormLabel>
-                <FormControl>
-                  <FileInput
-                    className="min-h-20 text-current bg-input/30 rounded-lg flex flex-col items-center justify-center outline-dashed outline-input outline-2 -outline-offset-8 hover:bg-input"
-                    onChange={(e) => field.onChange(e.target.files?.[0])} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            name="backline"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>Backline</FormLabel>
-                <FormControl>
-                  <FileInput
-                    className="min-h-20 text-current bg-input/30 rounded-lg flex flex-col items-center justify-center outline-dashed outline-input outline-2 -outline-offset-8 hover:bg-input"
-                    onChange={(e) => field.onChange(e.target.files?.[0])} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
         </section>
         <div className="flex flex-col w-full gap-4 items-center">
           <Separator orientation="horizontal" />

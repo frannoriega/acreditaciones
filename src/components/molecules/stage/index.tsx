@@ -30,6 +30,35 @@ interface StageProps<T> {
   style?: React.CSSProperties;
 }
 
+// Función para determinar el icono basado en los instrumentos
+function getInstrumentIcon(instruments: Set<string>): string {
+  if (instruments.size === 0) return '🎹'; // Default
+  
+  if (instruments.size > 1) return '🎵'; // Múltiples instrumentos
+  
+  const instrument = Array.from(instruments)[0];
+  
+  // Teclados
+  if (['keyboard', 'piano'].includes(instrument)) return '🎹';
+  
+  // Percusión
+  if (['drums', 'percussion'].includes(instrument)) return '🥁';
+  
+  // Cuerdas (guitarra/bajo)
+  if (['guitar', 'bass'].includes(instrument)) return '🎸';
+  
+  // Cuerdas (violín, cello, viola)
+  if (['violin', 'cello', 'viola'].includes(instrument)) return '🎻';
+  
+  // Viento
+  if (['trumpet', 'saxophone', 'flute', 'clarinet', 'trombone'].includes(instrument)) return '🎺';
+  
+  // Voz
+  if (['voice', 'backing_vocals'].includes(instrument)) return '🎤';
+  
+  return '🎹'; // Default
+}
+
 export function Stage<T>({
   width = 1024,
   height = 630,
@@ -51,7 +80,6 @@ export function Stage<T>({
 
   // Sync points with parent when they change
   useEffect(() => {
-    console.log(points)
     onPointsChange?.(points);
   }, [points, onPointsChange]);
 
@@ -75,11 +103,11 @@ export function Stage<T>({
     ctx.clearRect(0, 0, width, height);
 
     // Set guide line style
-    ctx.strokeStyle = 'rgba(0, 0, 255, 0.5)';
+    ctx.strokeStyle = '#FFFFFF';
     ctx.lineWidth = 1;
     ctx.setLineDash([5, 5]);
     ctx.font = '18px Arial';
-    ctx.fillStyle = 'blue';
+    ctx.fillStyle = '#FFFFFF';
 
     // Draw vertical guide line (x-axis)
     ctx.beginPath();
@@ -173,27 +201,33 @@ export function Stage<T>({
     setOpen(false);
   };
 
-  const defaultRenderPoint = (point: StagePoint<T>, index: number) => (
-    <button
-      key={`${point.coords.x}-${point.coords.y}-${index}`}
-      className='absolute bg-[#F229D9]/70 flex items-center justify-center cursor-pointer text-4xl w-min h-min rounded-full p-2'
-      style={{
-        position: 'absolute',
-        left: point.coords.x,
-        top: point.coords.y,
-        boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-      }}
-      title={`Point ${index + 1} (Click to remove)`}
-      onClick={(e) => {
-        e.preventDefault()
-        e.stopPropagation()
-        setActivePoint(point)
-        setOpen(true)
-      }}
-    >
-      🎹
-    </button>
-  );
+  const defaultRenderPoint = (point: StagePoint<T>, index: number) => {
+    // Determinar el icono basado en los instrumentos si el data tiene la propiedad instruments
+    const icon = (point.data as any)?.instruments ? 
+      getInstrumentIcon((point.data as any).instruments) : '🎹';
+
+    return (
+      <button
+        key={`${point.coords.x}-${point.coords.y}-${index}`}
+        className='absolute bg-[#F229D9]/70 flex items-center justify-center cursor-pointer text-4xl w-min h-min rounded-full p-2'
+        style={{
+          position: 'absolute',
+          left: point.coords.x,
+          top: point.coords.y,
+          boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+        }}
+        title={`Point ${index + 1} (Click to edit)`}
+        onClick={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          setActivePoint(point)
+          setOpen(true)
+        }}
+      >
+        {icon}
+      </button>
+    );
+  };
 
   return (
     <div
@@ -213,6 +247,7 @@ export function Stage<T>({
         onMouseLeave={handleCanvasMouseLeave}
         style={{
           cursor: 'crosshair',
+          zIndex: 5
         }}
       />
       <canvas

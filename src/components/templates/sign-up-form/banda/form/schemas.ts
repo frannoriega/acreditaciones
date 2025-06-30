@@ -1,9 +1,25 @@
 import z from "zod/v4";
 
 export const stageDataSchema = z.object({
-  rider: z.string(),
-  backline: z.string(),
-  io: z.string().optional()
+  instruments: z.set(
+    z.enum([
+      "guitar", "bass", "keyboard", "piano", "drums", "percussion", 
+      "violin", "cello", "viola", "trumpet", "saxophone", "flute", 
+      "clarinet", "trombone", "voice", "backing_vocals"
+    ]),
+  ).nonempty({ error: "Seleccione al menos un músico" }),
+  rider: z.array(z.string()).refine(
+    (arr) => arr.some(item => item.trim() !== ''),
+    { message: "Debe agregar al menos un elemento al rider" }
+  ),
+  backline: z.array(z.string()).refine(
+    (arr) => arr.some(item => item.trim() !== ''),
+    { message: "Debe agregar al menos un elemento al backline" }
+  ),
+  io: z.array(z.string()).refine(
+    (arr) => arr.some(item => item.trim() !== ''),
+    { message: "Debe agregar al menos un elemento al I/O" }
+  )
 })
 
 export const newBandFormSchema = z.object({

@@ -1,112 +1,302 @@
 'use client'
 import { Badge } from "@/components/atoms/ui/badge"
 import { Button } from "@/components/atoms/ui/button"
-import { Command, CommandInput, CommandItem, CommandList } from "@/components/atoms/ui/command"
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator } from "@/components/atoms/ui/command"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/atoms/ui/popover"
-import { CircleX } from "lucide-react"
-import {  useEffect, useState } from "react"
-import { MultiSet } from "mnemonist"
+import { ScrollArea, ScrollBar } from "@/components/atoms/ui/scroll-area"
+import { cn } from "@/lib/utils"
+import { CheckIcon, CircleX } from "lucide-react"
+import { createContext, useContext, useEffect, useRef, useState } from "react"
 
-const items = [
-  {
-    label: "Guitarrista",
-    value: "guitar",
-    bg: "bg-[#FFC192]"
-  },
-  {
-    label: "Tecladista",
-    value: "keyboard",
-    bg: "bg-[#F97BC2]"
-  }
-]
-
-type MultiSelectProps = {
-  onValueChange: (vals: Map<string, number>) => void
+interface MultiSelectContextValue {
+  open: boolean;
+  setOpen: (open: boolean) => void;
+  selectedValue: { value: string; label: string; }[];
+  searchQuery: string;
+  triggerRef: React.RefObject<HTMLButtonElement | null>;
+  contentRef: React.RefObject<HTMLDivElement | null>;
+  onValueChange: (values: { value: string; label: string; }[]) => void;
+  onSearchChange: (query: string) => void;
+  onTriggerClick: () => void;
+  onContentBlur: () => void;
 }
 
-function MultiSelect({ onValueChange }: MultiSelectProps) {
-  const [selected, setSelected] = useState<MultiSet<{ label: string, value: string, bg: string }>>(new MultiSet());
-  const [values, setValues] = useState<Map<string, number>>(new Map())
+const MultiSelectContext = createContext<MultiSelectContextValue | null>(null);
 
+export function MultiSelect({ children, defaultValues = [], onValueChange, className }: {
+  children: React.ReactNode;
+  defaultValues?: { value: string; label: string; }[];
+  onValueChange?: (values: { value: string; label: string; }[]) => void;
+  className?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const [selectedValues, setSelectedValues] = useState<{ value: string; label: string; }[]>(defaultValues);
+  const [searchQuery, setSearchQuery] = useState('');
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const contentRef = useRef<HTMLDivElement | null>(null);
+
+  const handleValueChange = (values: { value: string; label: string; }[]) => {
+    setSelectedValues(values);
+    onValueChange?.(values);
+    setOpen(false);
+    setSearchQuery('');
+  };
+
+  const handleSearchChange = (query: string) => {
+    setSearchQuery(query);
+  };
+
+  const handleTriggerClick = () => {
+    setOpen(!open);
+  };
+
+  const handleContentBlur = () => {
+    setOpen(false);
+    setSearchQuery('');
+  };
+
+  // Close when clicking outside
   useEffect(() => {
-    onValueChange(values)
-  }, [onValueChange, values])
+    const handleClickOutside = (event: MouseEvent) => {
+      if (contentRef.current &&
+        !contentRef.current.contains(event.target as Node) &&
+        triggerRef.current &&
+        !triggerRef.current.contains(event.target as Node)) {
+        setOpen(false);
+        setSearchQuery('');
+      }
+    };
 
-  const [open, setOpen] = useState(false)
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const contextValue: MultiSelectContextValue = {
+    open,
+    setOpen,
+    selectedValue: selectedValues,
+    searchQuery,
+    triggerRef,
+    contentRef,
+    onValueChange: handleValueChange,
+    onSearchChange: handleSearchChange,
+    onTriggerClick: handleTriggerClick,
+    onContentBlur: handleContentBlur,
+  };
+
+  const cns = cn("h-full w-fit flex flex-row gap-4 items-center", className)
 
   return (
-    <div className="h-full flex flex-row gap-4 items-center">
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button variant="outline">
-            Agregar músicos
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="p-2">
-          <Command>
-            <CommandInput placeholder="Buscar..." />
-            <CommandList className="pt-2 w-full">
-              {items.map((item, index) => (
-                <CommandItem key={index} onSelect={() => {
-                  const newSet = MultiSet.from(selected.values());
-                  newSet.add(item);
-                  setSelected(newSet);
-                  setValues(map => {
-                    const newMap = new Map(map)
-                    if (newMap.has(item.value)) {
-                      const old = newMap.get(item.value)
-                      newMap.set(item.value, (old ?? 0) + 1)
-                    } else {
-                      newMap.set(item.value, 1)
-                    }
-                    return newMap
-                  })
-                }} className="w-full">
-                  {item.label}
-                </CommandItem>
-              ))}
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
-      <ul className="flex flex-row gap-2 flex-wrap w-full">
-        {Array.from(selected.values()).map((item, index) => (
-          <li key={index}>
-            <Badge className={item.bg}>
-              <span key={index}>
-                {item.label}
-              </span>
-              <Button
-                type="button"
-                onClick={() => {
-                  const newSet = MultiSet.from(selected.values());
-                  newSet.remove(item);
-                  setSelected(newSet);
-                  setValues(map => {
-                    const newMap = new Map(map)
-                    if (newMap.has(item.value)) {
-                      const old = newMap.get(item.value)
-                      newMap.set(item.value, (old ?? 1) - 1)
-                    } else {
-                      newMap.set(item.value, 0)
-                    }
-                    return newMap
-                  })
-                }
-                }
-                className="w-4 h-4 p-0 m-0 bg-transparent"
-              >
-                <CircleX className="w-4 h-4" />
-              </Button>
-            </Badge>
-          </li>
-        ))
-        }
-      </ul>
-    </div>
+    <MultiSelectContext.Provider value={contextValue}>
+      <div className={cns}>
+        {children}
+      </div>
+    </MultiSelectContext.Provider>
+  );
+}
+
+export function MultiSelectValues({ className }: {
+  className?: string
+}) {
+  const context = useContext(MultiSelectContext);
+  if (!context) throw new Error('MultiSelectBadges must be used within MultiSelect');
+  const cns = cn("w-full justify-between", className)
+
+  return (
+    <ul className="flex flex-row gap-2 flex-wrap w-full">
+      {context.selectedValue.map((item, index) => (
+        <li key={index}>
+          <Badge className={cns} data-sel={item.value} >
+            <span key={index}>
+              {item.label}
+            </span>
+            <Button
+              type="button"
+              onClick={() => {
+                const newVals = context.selectedValue.filter(v => v.value != item.value)
+                context.onValueChange(newVals)
+              }}
+              className="w-4 h-4 p-0 m-0 bg-transparent"
+            >
+              <CircleX className="w-4 h-4" />
+            </Button>
+          </Badge>
+        </li>
+      ))
+      }
+    </ul>
   )
 }
 
-export {
-  MultiSelect
+export function MultiSelectMenu({ children }: {
+  children: React.ReactNode;
+}) {
+  const context = useContext(MultiSelectContext);
+  if (!context) throw new Error('MultiSelectMenu must be used within MultiSelect');
+
+  const { open, setOpen } = context
+
+  return (
+    <Popover open={open} onOpenChange={setOpen} modal={true}>
+      {children}
+    </Popover>
+  );
+}
+
+export function MultiSelectTrigger({ children, className }: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  const context = useContext(MultiSelectContext);
+  if (!context) throw new Error('MultiSelectTrigger must be used within MultiSelect');
+
+  const { onTriggerClick, triggerRef } = context;
+
+  const cns = cn("w-fit min-w-80 justify-between", className)
+
+  return (
+    <PopoverTrigger asChild>
+      <Button
+        ref={triggerRef}
+        variant="outline"
+        role="combobox"
+        onClick={onTriggerClick}
+        className={cns}
+      >
+        {children}
+      </Button>
+    </PopoverTrigger>
+  );
+}
+
+export function MultiSelectContent({ children, className }: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  const context = useContext(MultiSelectContext);
+  if (!context) throw new Error('MultiSelectContent must be used within MultiSelect');
+
+  const { open, contentRef } = context;
+
+  if (!open) return null;
+
+  const cns = cn("w-(--radix-popover-trigger-width) p-0 z-[9999]", className)
+
+  return (
+    <PopoverContent 
+      ref={contentRef} 
+      className={cns} 
+      align="start" 
+      sideOffset={4}
+    >
+      <Command className="p-0">
+        {children}
+      </Command>
+    </PopoverContent>
+  );
+}
+
+export function MultiSelectInput({ placeholder = 'Search...', className }: {
+  placeholder?: string;
+  className?: string;
+}) {
+  const context = useContext(MultiSelectContext);
+  if (!context) throw new Error('MultiSelectInput must be used within MultiSelect');
+
+  const { searchQuery, onSearchChange } = context;
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Focus input when content opens
+  useEffect(() => {
+    if (context.open && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [context.open]);
+
+  return (
+    <CommandInput placeholder={placeholder} className={className} onValueChange={onSearchChange} value={searchQuery} />
+  );
+}
+
+export function MultiSelectList({ children, className }: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  const context = useContext(MultiSelectContext);
+  if (!context) throw new Error('MultiSelectList must be used within MultiSelect');
+
+  return (
+    <CommandList className={className}>
+        {children}
+    </CommandList>
+  );
+}
+
+export function MultiSelectGroup({ children, className, heading }: {
+  children: React.ReactNode;
+  className?: string;
+  heading?: string;
+}) {
+  const context = useContext(MultiSelectContext);
+  if (!context) throw new Error('MultiSelectGroup must be used within MultiSelect');
+
+  return (
+    <CommandGroup className={className} heading={heading}>
+      {children}
+    </CommandGroup>
+  );
+}
+
+export function MultiSelectEmpty({ children, className }: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+
+  const context = useContext(MultiSelectContext);
+  if (!context) throw new Error('MultiSelectList must be used within MultiSelect');
+
+  const cns = cn("text-muted-foreground p-1 text-md", className)
+
+  return (
+    <CommandEmpty className={cns} >
+      {children}
+    </CommandEmpty>
+  );
+}
+
+export function MultiSelectItem({ value, children, className }: {
+  value: string;
+  children: string;
+  className?: string;
+}) {
+  const context = useContext(MultiSelectContext);
+  if (!context) throw new Error('MultiSelectItem must be used within MultiSelect');
+  if (typeof children !== "string") throw new Error('children must be a string')
+
+  const { onValueChange, selectedValue } = context;
+
+  const cns = cn("w-full flex justify-between", className)
+
+  return (
+    <CommandItem
+      value={value}
+      onSelect={val => {
+        const idx = selectedValue.findIndex(v => v.value === val)
+        if (idx < 0) {
+          onValueChange([...selectedValue, { value: val, label: children }])
+        } else {
+          const newVals = [...selectedValue]
+          newVals.splice(idx, 1)
+          onValueChange(newVals)
+        }
+      }
+      }
+      className={cns}
+    >
+      {children}
+      {selectedValue.some(v => v.value == value) &&
+        <CheckIcon className="size-4" />
+      }
+    </CommandItem>
+  );
 }
