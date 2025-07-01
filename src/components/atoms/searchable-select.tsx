@@ -1,7 +1,7 @@
 import { Popover, PopoverContent, PopoverTrigger } from '@radix-ui/react-popover';
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { Button } from './ui/button';
-import { CheckIcon, ChevronDownIcon, ChevronsDownIcon } from 'lucide-react';
+import { Check, ChevronDown } from 'lucide-react';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from './ui/command';
 import { cn } from '@/lib/utils';
 
@@ -112,7 +112,7 @@ export function SearchableSelectTrigger({ children, className }: {
         className={cns}
       >
         {children}
-        <ChevronDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
       </Button>
     </PopoverTrigger>
   );
@@ -248,7 +248,7 @@ export function SearchableSelectItem({ value, children, className }: {
     >
       {children}
       {selectedValue == value &&
-        <CheckIcon className="size-4" />
+        <Check className="size-4" />
       }
     </CommandItem>
   );

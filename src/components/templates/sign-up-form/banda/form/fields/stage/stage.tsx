@@ -9,7 +9,7 @@ import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { Button } from "@/components/atoms/ui/button";
 import { Label } from "@/components/atoms/ui/label";
 import { MultiSelect, MultiSelectContent, MultiSelectEmpty, MultiSelectInput, MultiSelectItem, MultiSelectList, MultiSelectMenu, MultiSelectTrigger, MultiSelectValues, MultiSelectGroup } from "@/components/molecules/multi-select";
-import { DynamicInputList } from "@/components/molecules/form/dynamic-input-list";
+import { DynamicFieldList } from "@/components/molecules/form/dynamic-field-list";
 
 type StagePoint<T> = {
   coords: {
@@ -99,7 +99,7 @@ function PointForm({ data, onSave, onClose }: PointFormProps<z.infer<typeof stag
       ...data,
       rider: data.rider.filter(item => item.trim() !== ''),
       backline: data.backline.filter(item => item.trim() !== ''),
-      io: data.io.filter(item => item.trim() !== '')
+      io: data.io?.filter(item => item.trim() !== '') || []
     };
     console.log('cleanData:', cleanData);
     onSave(cleanData);
@@ -181,10 +181,10 @@ function PointForm({ data, onSave, onClose }: PointFormProps<z.infer<typeof stag
         <FormField
           name="rider"
           control={stageForm.control}
-          render={({ field }) => (
+          render={() => (
             <FormItem>
               <FormControl>
-                <DynamicInputList
+                <DynamicFieldList
                   label="Rider"
                   name="rider"
                   control={stageForm.control}
@@ -199,10 +199,10 @@ function PointForm({ data, onSave, onClose }: PointFormProps<z.infer<typeof stag
         <FormField
           name="backline"
           control={stageForm.control}
-          render={({ field }) => (
+          render={() => (
             <FormItem>
               <FormControl>
-                <DynamicInputList
+                <DynamicFieldList
                   label="Backline"
                   name="backline"
                   control={stageForm.control}
@@ -217,11 +217,11 @@ function PointForm({ data, onSave, onClose }: PointFormProps<z.infer<typeof stag
         <FormField
           name="io"
           control={stageForm.control}
-          render={({ field }) => (
+          render={() => (
             <FormItem>
               <FormControl>
-                <DynamicInputList
-                  label="I/O"
+                <DynamicFieldList
+                  label="I/O (opcional)"
                   name="io"
                   control={stageForm.control}
                   placeholder="Ej: Canal 1 - Guitarra eléctrica"

@@ -6,7 +6,6 @@ import { Button } from "@/components/atoms/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/atoms/ui/form";
 import { Input } from "@/components/atoms/ui/input";
 import { Label } from "@/components/atoms/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/atoms/ui/select";
 import { Separator } from "@/components/atoms/ui/separator";
 import { Textarea } from "@/components/atoms/ui/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/atoms/ui/tooltip";

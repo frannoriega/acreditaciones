@@ -1,7 +1,6 @@
 'use client'
-import FileInput from "@/components/atoms/file-input";
 import { Button } from "@/components/atoms/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/atoms/ui/form";
+import { Form } from "@/components/atoms/ui/form";
 import { Separator } from "@/components/atoms/ui/separator";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { useForm } from "react-hook-form";
@@ -10,7 +9,6 @@ import NameField from "./fields/about/name";
 import GenderField from "./fields/about/gender";
 import BioField from "./fields/about/bio";
 import DiscographyField from "./fields/about/discography";
-import InstrumentsField from "./fields/members/instruments";
 import SupportField from "./fields/members/support";
 import FeeField from "./fields/stage/fee";
 import StageField from "./fields/stage/stage";
@@ -40,10 +38,6 @@ const newBandFormSchema = z.object({
   support: z.coerce.number({
     error: "Ingrese un número"
   }).nonnegative("Ingrese un número positivo"),
-  instruments: z.map(
-    z.enum(["guitar", "keyboard"]),
-    z.number()
-  ).refine(m => m.size == 0 || m.values().some(v => v > 0), { error: "Seleccione al menos un músico" }),
   fee: z.coerce.number({
     error: "Ingrese un número"
   }).nonnegative("Ingrese un número positivo"),
@@ -67,8 +61,6 @@ export default function BandSignUpForm({ }: BandSignUpFormProps) {
     gender: undefined,
     support: 0,
     fee: 0,
-    instruments: new Map(),
-    discography: [],
     rider: undefined,
     backline: undefined,
     stage: undefined,

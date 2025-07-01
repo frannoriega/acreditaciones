@@ -1,12 +1,11 @@
 'use client'
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { Badge } from "@/components/atoms/ui/badge"
 import { Button } from "@/components/atoms/ui/button"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator } from "@/components/atoms/ui/command"
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/atoms/ui/command"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/atoms/ui/popover"
-import { ScrollArea, ScrollBar } from "@/components/atoms/ui/scroll-area"
-import { cn } from "@/lib/utils"
 import { CheckIcon, CircleX } from "lucide-react"
-import { createContext, useContext, useEffect, useRef, useState } from "react"
+import { cn } from "@/lib/utils"
 
 interface MultiSelectContextValue {
   open: boolean;

@@ -16,10 +16,7 @@ export const stageDataSchema = z.object({
     (arr) => arr.some(item => item.trim() !== ''),
     { message: "Debe agregar al menos un elemento al backline" }
   ),
-  io: z.array(z.string()).refine(
-    (arr) => arr.some(item => item.trim() !== ''),
-    { message: "Debe agregar al menos un elemento al I/O" }
-  )
+  io: z.array(z.string()).optional().default([])
 })
 
 export const newBandFormSchema = z.object({

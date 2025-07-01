@@ -166,45 +166,30 @@ export function Stage<T>({
     setOpen(true);
   }
 
-  const handleRemovePoint = (index: number) => {
-    const newPoints = [...points];
-    newPoints.splice(index, 1);
-    setPoints(newPoints);
-  }
+  const handlePointClick = (point: StagePoint<T>) => {
+    setActivePoint(point);
+    setOpen(true);
+  };
 
-  const handleAddPoint = (data: T) => {
-    if (!activePoint) return;
-
-    console.log(activePoint)
-    console.log(points)
-    console.log(data)
-    const pointIdx = points.findIndex(p => p.coords.x === activePoint.coords.x && p.coords.y === activePoint.coords.y)
-
-    if (pointIdx < 0) {
-      const newPoint: StagePoint<T> = {
-        coords: {
-          x: activePoint.coords.x,
-          y: activePoint.coords.y,
-        },
-        data,
-      };
-
-      setPoints(prev => [...prev, newPoint]);
-    } else {
-      setPoints(prev => {
-        const newPoints = [...prev]
-        newPoints[pointIdx].data = data
-        return newPoints
-      })
+  const handleSavePoint = (updatedData: T) => {
+    if (activePoint) {
+      setPoints(prev => 
+        prev.map(p => 
+          p === activePoint 
+            ? { ...p, data: updatedData }
+            : p
+        )
+      );
     }
-
     setOpen(false);
+    setActivePoint(null);
   };
 
   const defaultRenderPoint = (point: StagePoint<T>, index: number) => {
     // Determinar el icono basado en los instrumentos si el data tiene la propiedad instruments
-    const icon = (point.data as any)?.instruments ? 
-      getInstrumentIcon((point.data as any).instruments) : '🎹';
+    const pointData = point.data as { instruments?: Set<string> };
+    const icon = pointData?.instruments ? 
+      getInstrumentIcon(pointData.instruments) : '🎹';
 
     return (
       <button
@@ -220,8 +205,7 @@ export function Stage<T>({
         onClick={(e) => {
           e.preventDefault()
           e.stopPropagation()
-          setActivePoint(point)
-          setOpen(true)
+          handlePointClick(point)
         }}
       >
         {icon}
@@ -277,7 +261,7 @@ export function Stage<T>({
             <DialogTitle>Titulo</DialogTitle>
             {renderModal({
               point: activePoint,
-              onSave: handleAddPoint,
+              onSave: handleSavePoint,
               onRemove: () => {
 
               },
