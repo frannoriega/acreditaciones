@@ -16,7 +16,7 @@ export default async function UserLayout({
   return (
     <SidebarProvider defaultOpen={false} className="w-full flex flex-col h-full">
       <Navbar />
-      <div className="min-h-screen w-full flex flex-row">
+      <div className="min-h-screen relative w-full flex flex-row">
         <UserSidebar />
         <div className="flex flex-col w-full items-center">
           {children}

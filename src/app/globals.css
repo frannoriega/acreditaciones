@@ -143,3 +143,37 @@
     --chart-5: 340 75% 55%;
   }
 }
+
+/* Custom sidebar transitions */
+@layer components {
+  /* Override the default sidebar transitions for smooth animation */
+  [data-slot="sidebar-gap"] {
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  }
+  
+  [data-slot="sidebar-container"] {
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), left 0.3s cubic-bezier(0.4, 0, 0.2, 1), right 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  }
+  
+  /* Smooth text opacity transition */
+  [data-slot="sidebar-menu-button"] span {
+    transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  }
+  
+  /* Hide text when collapsed */
+  .group-data-\[collapsible\=icon\] [data-slot="sidebar-menu-button"] span {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  
+  /* Show text when expanded */
+  .group:not(.group-data-\[collapsible\=icon\]) [data-slot="sidebar-menu-button"] span {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  
+  /* Smooth button transitions */
+  [data-slot="sidebar-menu-button"] {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  }
+}
