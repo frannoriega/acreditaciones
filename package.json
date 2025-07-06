@@ -72,6 +72,6 @@
     "typescript": "^5"
   },
   "prisma": {
-    "schema": "./src/prisma/auth.prisma"
+    "schema": "./prisma/schema.prisma"
   }
 }

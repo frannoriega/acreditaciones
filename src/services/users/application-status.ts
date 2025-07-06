@@ -69,9 +69,13 @@ export async function getUserApplicationStatus(email: string): Promise<UserAppli
  * Mark a user as having applied
  */
 export async function markUserAsApplied(email: string): Promise<void> {
-  await prisma.user.update({
+  await prisma.user.upsert({
     where: { email },
-    data: { hasApplied: true }
+    update: { hasApplied: true },
+    create: { 
+      email,
+      hasApplied: true
+    }
   })
 }
 

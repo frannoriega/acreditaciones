@@ -1,7 +1,8 @@
 import React from 'react';
 import { Input } from '@/components/atoms/ui/input';
 import { Label } from '@/components/atoms/ui/label';
-import { ControllerProps, FieldPath, FieldValues, useController } from 'react-hook-form';
+import { FormMessage } from '@/components/atoms/ui/form';
+import { ControllerProps, FieldPath, FieldValues, useController, useFormContext } from 'react-hook-form';
 
 export type DynamicFieldListProps<
   TFieldValues extends FieldValues = FieldValues,
@@ -29,26 +30,30 @@ export function DynamicFieldList<
     control,
   });
 
+  const form = useFormContext<TFieldValues>();
+  const fieldState = form.getFieldState(name);
+
   // Asegurar que values sea un array de strings
   const values = (field.value as string[]) || [];
-  const displayValues = values.length === 0 ? [''] : values;
+  // Para mostrar en la UI, siempre tener al menos un campo vacío al final
+  const displayValues = values.length === 0 ? [''] : [...values, ''];
 
   const handleInputChange = (index: number, value: string) => {
-    const newValues = [...displayValues];
-    newValues[index] = value;
+    const newDisplayValues = [...displayValues];
+    newDisplayValues[index] = value;
     
     // Si el campo actual no está vacío y es el último, agregar un nuevo campo vacío
     const isEmpty = value.trim() === '';
     
     if (!isEmpty && index === displayValues.length - 1) {
-      newValues.push('');
+      newDisplayValues.push('');
     }
     
-    // Remover campos vacíos al final (excepto el último si hay al menos un campo con contenido)
-    const nonEmptyValues = newValues.filter(val => val.trim() !== '');
-    const finalValues = [...nonEmptyValues, ''];
+    // Filtrar solo los valores no vacíos para el formulario
+    const cleanValues = newDisplayValues.filter(val => val.trim() !== '');
     
-    field.onChange(finalValues);
+    // Actualizar el campo del formulario solo con valores válidos
+    field.onChange(cleanValues);
   };
 
   const defaultRenderField = (value: string, index: number, onChange: (value: string) => void) => (

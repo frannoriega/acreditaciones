@@ -92,7 +92,7 @@ model Foodtruck {
   foodtruckName String            @map("foodtruck_name")
   employees     Int               @default(0)
   cuisineType   String            @map("cuisine_type")
-  menuItems     String            @map("menu_items")
+  menuItems     String[]          @map("menu_items")
   lot           String?
   status        ApplicationStatus @default(PENDING_APPROVAL)
   createdAt     DateTime          @default(now()) @map("created_at")
