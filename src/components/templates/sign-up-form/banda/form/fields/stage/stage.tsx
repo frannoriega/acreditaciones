@@ -101,7 +101,6 @@ function PointForm({ data, onSave, onClose }: PointFormProps<z.infer<typeof stag
       backline: data.backline.filter(item => item.trim() !== ''),
       io: data.io?.filter(item => item.trim() !== '') || []
     };
-    console.log('cleanData:', cleanData);
     onSave(cleanData);
     onClose();
   }

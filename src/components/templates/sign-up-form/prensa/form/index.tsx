@@ -9,7 +9,7 @@ import { Label } from "@/components/atoms/ui/label";
 import { Separator } from "@/components/atoms/ui/separator";
 import { Textarea } from "@/components/atoms/ui/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/atoms/ui/tooltip";
-import { MultiSelect } from "@/components/molecules/multi-select";
+import { MultiSelect, MultiSelectValues, MultiSelectMenu, MultiSelectTrigger, MultiSelectContent, MultiSelectInput, MultiSelectList, MultiSelectGroup, MultiSelectItem } from "@/components/molecules/multi-select";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { Info, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -82,7 +82,7 @@ export default function PressSignUpForm({ }: PressSignUpFormProps) {
   }, [form]);
 
   function onSubmit(values: z.infer<typeof newPressFormSchema>) {
-    console.log(values);
+    // Handle form submission
   }
 
   return (
@@ -169,14 +169,27 @@ export default function PressSignUpForm({ }: PressSignUpFormProps) {
               <FormItem className="w-full flex flex-col gap-2">
                 <FormLabel>Seleccione los integrantes</FormLabel>
                 <FormControl>
-                  <MultiSelect
-                    onValueChange={field.onChange}
-                  />
+                  <MultiSelect onValueChange={field.onChange}>
+                    <MultiSelectValues />
+                    <MultiSelectMenu>
+                      <MultiSelectTrigger>
+                        <span>Seleccionar integrantes</span>
+                      </MultiSelectTrigger>
+                      <MultiSelectContent>
+                        <MultiSelectInput placeholder="Buscar integrantes..." />
+                        <MultiSelectList>
+                          <MultiSelectGroup heading="Instrumentos">
+                            <MultiSelectItem value="guitar">Guitarra</MultiSelectItem>
+                            <MultiSelectItem value="keyboard">Teclado</MultiSelectItem>
+                          </MultiSelectGroup>
+                        </MultiSelectList>
+                      </MultiSelectContent>
+                    </MultiSelectMenu>
+                  </MultiSelect>
                 </FormControl>
                 <FormMessage />
               </FormItem>
-            )
-            }
+            )}
           />
           <FormField
             name="support"

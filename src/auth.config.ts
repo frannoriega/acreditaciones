@@ -18,8 +18,14 @@ const baseConfig = {
       return true
     },
     redirect: async ({ url, baseUrl }) => {
-      // Let the middleware handle redirects based on application status
-      return url.startsWith(baseUrl) ? url : baseUrl + "/u"
+      // Handle external URLs
+      if (!url.startsWith(baseUrl)) {
+        return baseUrl
+      }
+
+      // For internal URLs, let the middleware handle redirects based on application status
+      // The middleware will redirect to /u or /nuevo based on hasApplied
+      return url
     },
   }
 } satisfies Partial<NextAuthConfig>

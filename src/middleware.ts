@@ -7,9 +7,9 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
   // Public routes that don't require authentication
-  const publicRoutes = ["/", "/api/auth", "/auth/verify-request"];
+  const publicRoutes = ["/api/auth", "/auth/verify-request"];
   const isPublicRoute = publicRoutes.some(route => 
-    pathname === route || pathname.startsWith(route)
+    pathname.startsWith(route)
   );
 
   if (isPublicRoute) {
@@ -19,11 +19,15 @@ export async function middleware(request: NextRequest) {
   // Check if user is authenticated
   const token = await getToken({ 
     req: request, 
-    secret: process.env.NEXTAUTH_SECRET 
+    secret: process.env.AUTH_SECRET
   });
 
   if (!token) {
-    return NextResponse.redirect(new URL("/", request.nextUrl.origin));
+    // If not authenticated and trying to access protected routes, redirect to sign in
+    if (pathname !== "/") {
+      return NextResponse.redirect(new URL("/", request.nextUrl.origin));
+    }
+    return NextResponse.next();
   }
 
   // User is authenticated, handle application status redirects
@@ -31,6 +35,13 @@ export async function middleware(request: NextRequest) {
   
   if (!userEmail) {
     return NextResponse.redirect(new URL("/", request.nextUrl.origin));
+  }
+
+  // Handle root path for authenticated users
+  if (pathname === "/") {
+    const hasApplied = await checkUserApplicationStatus(userEmail);
+    const redirectPath = hasApplied ? "/u" : "/nuevo";
+    return NextResponse.redirect(new URL(redirectPath, request.nextUrl.origin));
   }
 
   // Check application status for specific routes

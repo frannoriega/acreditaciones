@@ -14,6 +14,7 @@ import DiscographyField from "./fields/about/discography";
 import SupportField from "./fields/members/support";
 import FeeField from "./fields/stage/fee";
 import StageField from "./fields/stage/stage";
+import { useRouter } from "next/navigation";
 
 
 
@@ -23,6 +24,7 @@ type BandSignUpFormProps = {
 
 export default function BandSignUpForm({ }: BandSignUpFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
   
   const defaultValues = {
     name: "",
@@ -42,7 +44,6 @@ export default function BandSignUpForm({ }: BandSignUpFormProps) {
 
 
   async function onSubmit(values: z.infer<typeof newBandFormSchema>) {
-    console.log("onSubmit triggered with values:", values);
     setIsSubmitting(true);
     try {
       // Create FormData for file uploads
@@ -70,11 +71,10 @@ export default function BandSignUpForm({ }: BandSignUpFormProps) {
         throw new Error(error.error || "Failed to submit application");
       }
 
-      const result = await response.json();
-      console.log("Application submitted successfully:", result);
+      await response.json();
       
       // Redirect to user dashboard
-      window.location.href = "/u";
+      router.push('/u');
       
     } catch (error) {
       console.error("Error submitting application:", error);
@@ -86,11 +86,7 @@ export default function BandSignUpForm({ }: BandSignUpFormProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit, (errors) => {
-        console.log("Form validation errors:", errors);
-        console.log("Form values:", form.getValues());
-        console.log("Form is valid:", form.formState.isValid);
-      })} className="flex flex-col gap-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
         <section className="flex flex-col gap-4">
           <h1 className="text-lg font-semibold w-full">Acerca de la banda</h1>
           <div className="flex flex-row gap-4">
@@ -121,11 +117,6 @@ export default function BandSignUpForm({ }: BandSignUpFormProps) {
               type="submit" 
               className="w-full" 
               disabled={isSubmitting}
-              onClick={() => {
-                console.log("Submit button clicked");
-                console.log("Form state:", form.formState);
-                console.log("Current values:", form.getValues());
-              }}
             >
               {isSubmitting ? "Enviando..." : "Enviar"}
             </Button>
