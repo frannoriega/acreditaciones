@@ -1,10 +1,12 @@
 'use client'
 import { Button } from "@/components/atoms/ui/button";
-import { Form } from "@/components/atoms/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/atoms/ui/form";
 import { Separator } from "@/components/atoms/ui/separator";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { useForm } from "react-hook-form";
+import { useState } from "react";
 import { z } from "zod/v4";
+import { newBandFormSchema } from "./schemas";
 import NameField from "./fields/about/name";
 import GenderField from "./fields/about/gender";
 import BioField from "./fields/about/bio";
@@ -13,56 +15,21 @@ import SupportField from "./fields/members/support";
 import FeeField from "./fields/stage/fee";
 import StageField from "./fields/stage/stage";
 
-const stageSchema = z.object({
-  coords: z.object({
-    x: z.number().nonnegative(),
-    y: z.number().nonnegative()
-  }),
-  data: z.object({
-    rider: z.string(),
-    backline: z.string(),
-    io: z.string().optional(),
-  })
-})
 
-const newBandFormSchema = z.object({
-  name: z.string().regex(/^[a-zA-Z0-9]*$/, "Sólo se permite caracteres alfanuméricos").min(3, "Ingrese al menos 3 caracteres"),
-  bio: z.string().nonempty("Ingrese una biografía").max(500),
-  gender: z.enum(["cumbia", "rock"], "Seleccione un género"),
-  discography: z.array(
-    z.object({
-      name: z.string().nonempty("Ingrese un nombre para el disco"),
-      release_date: z.coerce.number("Ingrese un número").min(1930, "Ingrese un año mayor a 1930").max(new Date().getFullYear(), "Ingrese un año actual o pasado")
-    })
-  ),
-  support: z.coerce.number({
-    error: "Ingrese un número"
-  }).nonnegative("Ingrese un número positivo"),
-  fee: z.coerce.number({
-    error: "Ingrese un número"
-  }).nonnegative("Ingrese un número positivo"),
-  rider: z.file({
-    error: "Ingrese un archivo"
-  }),
-  backline: z.file("Ingrese un archivo en formato PDF o imagen"),
-  stage: z.array(
-    stageSchema
-  ),
-})
 
 type BandSignUpFormProps = {
   onProgress?: (progress: number) => void
 }
 
 export default function BandSignUpForm({ }: BandSignUpFormProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
   const defaultValues = {
     name: "",
     bio: "",
     gender: undefined,
     support: 0,
     fee: 0,
-    rider: undefined,
-    backline: undefined,
     stage: undefined,
   }
 
@@ -74,13 +41,56 @@ export default function BandSignUpForm({ }: BandSignUpFormProps) {
   })
 
 
-  function onSubmit(values: z.infer<typeof newBandFormSchema>) {
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof newBandFormSchema>) {
+    console.log("onSubmit triggered with values:", values);
+    setIsSubmitting(true);
+    try {
+      // Create FormData for file uploads
+      const formData = new FormData();
+      
+      // Add basic fields
+      formData.append("name", values.name);
+      formData.append("bio", values.bio);
+      formData.append("gender", values.gender);
+      formData.append("support", values.support.toString());
+      formData.append("fee", values.fee.toString());
+      
+      // Add arrays as JSON strings
+      formData.append("discography", JSON.stringify(values.discography));
+      formData.append("stage", JSON.stringify(values.stage || []));
+
+      // Submit to API
+      const response = await fetch("/api/bands", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to submit application");
+      }
+
+      const result = await response.json();
+      console.log("Application submitted successfully:", result);
+      
+      // Redirect to user dashboard
+      window.location.href = "/u";
+      
+    } catch (error) {
+      console.error("Error submitting application:", error);
+      alert("Error submitting application. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
+      <form onSubmit={form.handleSubmit(onSubmit, (errors) => {
+        console.log("Form validation errors:", errors);
+        console.log("Form values:", form.getValues());
+        console.log("Form is valid:", form.formState.isValid);
+      })} className="flex flex-col gap-4">
         <section className="flex flex-col gap-4">
           <h1 className="text-lg font-semibold w-full">Acerca de la banda</h1>
           <div className="flex flex-row gap-4">
@@ -107,7 +117,18 @@ export default function BandSignUpForm({ }: BandSignUpFormProps) {
         <div className="flex flex-col w-full gap-4 items-center">
           <Separator orientation="horizontal" />
           <div className="flex flex-row w-full gap-4 items-center">
-            <Button type="submit" className="w-full">Enviar</Button>
+            <Button 
+              type="submit" 
+              className="w-full" 
+              disabled={isSubmitting}
+              onClick={() => {
+                console.log("Submit button clicked");
+                console.log("Form state:", form.formState);
+                console.log("Current values:", form.getValues());
+              }}
+            >
+              {isSubmitting ? "Enviando..." : "Enviar"}
+            </Button>
           </div>
         </div>
       </form>

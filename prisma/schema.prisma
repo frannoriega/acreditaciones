@@ -1,0 +1,143 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String  @map("user_id")
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id")
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model User {
+  id            String          @id @default(cuid())
+  name          String?
+  email         String?         @unique
+  emailVerified DateTime?       @map("email_verified")
+  image         String?
+  hasApplied    Boolean         @default(false) @map("has_applied")
+  Authenticator Authenticator[]
+  accounts      Account[]
+  sessions      Session[]
+
+  @@map("users")
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+model Authenticator {
+  credentialID         String  @unique
+  userId               String
+  providerAccountId    String
+  credentialPublicKey  String
+  counter              Int
+  credentialDeviceType String
+  credentialBackedUp   Boolean
+  transports           String?
+  user                 User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, credentialID])
+}
+
+model Foodtruck {
+  id            String            @id @default(cuid())
+  email         String            @unique
+  foodtruckName String            @map("foodtruck_name")
+  employees     Int               @default(0)
+  cuisineType   String            @map("cuisine_type")
+  menuItems     String            @map("menu_items")
+  lot           String?
+  status        ApplicationStatus @default(PENDING_APPROVAL)
+  createdAt     DateTime          @default(now()) @map("created_at")
+  updatedAt     DateTime          @updatedAt @map("updated_at")
+
+  @@map("foodtrucks")
+}
+
+model Artisan {
+  id           String            @id @default(cuid())
+  email        String            @unique
+  businessName String            @map("business_name")
+  employees    Int               @default(0)
+  type         String
+  product      String
+  lot          String?
+  status       ApplicationStatus @default(PENDING_APPROVAL)
+  createdAt    DateTime          @default(now()) @map("created_at")
+  updatedAt    DateTime          @updatedAt @map("updated_at")
+
+  @@map("artisans")
+}
+
+model Band {
+  id          String            @id @default(cuid())
+  email       String            @unique
+  name        String
+  bio         String
+  gender      String
+  discography Json?
+  support     Int               @default(0)
+  fee         Int               @default(0)
+  rider       String?
+  backline    String?
+  stage       Json?
+  status      ApplicationStatus @default(PENDING_APPROVAL)
+  createdAt   DateTime          @default(now()) @map("created_at")
+  updatedAt   DateTime          @updatedAt @map("updated_at")
+
+  @@map("bands")
+}
+
+model Press {
+  id        String            @id @default(cuid())
+  email     String            @unique
+  mediaName String            @map("media_name")
+  employees Int               @default(0)
+  mediaType String            @map("media_type")
+  status    ApplicationStatus @default(PENDING_APPROVAL)
+  createdAt DateTime          @default(now()) @map("created_at")
+  updatedAt DateTime          @updatedAt @map("updated_at")
+
+  @@map("press")
+}
+
+enum ApplicationStatus {
+  PENDING_APPROVAL
+  CHANGE_REQUIRED
+  REJECTED
+  APPROVED
+}

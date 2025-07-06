@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "next-themes";
+import { SessionProvider } from "next-auth/react";
+import { auth } from "@/auth";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,19 +20,23 @@ export const metadata: Metadata = {
   description: "Sistema de acreditaciones de la Fiesta Nacional de la Playa de Río",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await auth();
+
   return (
     <html lang="es" className="h-full" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} self-stretch antialiased flex flex-col w-full min-h-full h-full items-stretch justify-stretch justify-items-stretch`}
       >
-        <ThemeProvider attribute="class" enableSystem enableColorScheme disableTransitionOnChange>
-          {children}
-        </ThemeProvider>
+        <SessionProvider session={session}>
+          <ThemeProvider attribute="class" enableSystem enableColorScheme disableTransitionOnChange>
+            {children}
+          </ThemeProvider>
+        </SessionProvider>
       </body>
     </html>
   );

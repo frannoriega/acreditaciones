@@ -12,12 +12,15 @@ const baseConfig = {
     authorized: async ({ auth }) => {
       return !!auth
     },
-    // signIn: async ({ user }) => {
-    //   if (user.email === 'frannoriega.92@gmail.com') {
-    //     return '/nuevo'
-    //   }
-    //   return true
-    // },
+    signIn: async ({ user }) => {
+      // After successful sign in, redirect based on application status
+      // The middleware will handle the actual redirect logic
+      return true
+    },
+    redirect: async ({ url, baseUrl }) => {
+      // Let the middleware handle redirects based on application status
+      return url.startsWith(baseUrl) ? url : baseUrl + "/u"
+    },
   }
 } satisfies Partial<NextAuthConfig>
 

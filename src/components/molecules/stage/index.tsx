@@ -173,13 +173,24 @@ export function Stage<T>({
 
   const handleSavePoint = (updatedData: T) => {
     if (activePoint) {
-      setPoints(prev => 
-        prev.map(p => 
-          p === activePoint 
-            ? { ...p, data: updatedData }
-            : p
-        )
-      );
+      setPoints(prev => {
+        // Check if this is an existing point or a new one
+        const existingPointIndex = prev.findIndex(p => 
+          p.coords.x === activePoint.coords.x && p.coords.y === activePoint.coords.y
+        );
+        
+        if (existingPointIndex >= 0) {
+          // Update existing point
+          return prev.map((p, index) => 
+            index === existingPointIndex 
+              ? { ...p, data: updatedData }
+              : p
+          );
+        } else {
+          // Add new point
+          return [...prev, { ...activePoint, data: updatedData }];
+        }
+      });
     }
     setOpen(false);
     setActivePoint(null);

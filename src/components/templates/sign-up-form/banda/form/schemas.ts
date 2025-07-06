@@ -32,17 +32,9 @@ export const newBandFormSchema = z.object({
   support: z.coerce.number({
     error: "Ingrese un número"
   }).nonnegative("Ingrese un número positivo"),
-  instruments: z.map(
-    z.enum(["guitar", "keyboard"]),
-    z.number()
-  ).refine(m => m.size == 0 || m.values().some(v => v > 0), { error: "Seleccione al menos un músico" }),
   fee: z.coerce.number({
     error: "Ingrese un número"
   }).nonnegative("Ingrese un número positivo"),
-  rider: z.file({
-    error: "Ingrese un archivo"
-  }),
-  backline: z.file("Ingrese un archivo en formato PDF o imagen"),
   stage: z.array(
     z.object({
       coords: z.object({
