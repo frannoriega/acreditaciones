@@ -29,7 +29,8 @@ export const authConfig = {
     Resend,
     Google({
       clientId: process.env.AUTH_GOOGLE_ID,
-      clientSecret: process.env.AUTH_GOOGLE_SECRET
+      clientSecret: process.env.AUTH_GOOGLE_SECRET,
+      allowDangerousEmailAccountLinking: true
     })
   ],
   ...baseConfig
@@ -39,7 +40,8 @@ export const middlewareConfig = {
   providers: [
     Google({
       clientId: process.env.AUTH_GOOGLE_ID,
-      clientSecret: process.env.AUTH_GOOGLE_SECRET
+      clientSecret: process.env.AUTH_GOOGLE_SECRET,
+      allowDangerousEmailAccountLinking: true
     })
   ],
   ...baseConfig

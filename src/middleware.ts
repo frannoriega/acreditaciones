@@ -33,19 +33,19 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/", request.nextUrl.origin));
   }
 
-  // Check if user is trying to access /nuevo
-  if (pathname === "/nuevo") {
-    // For now, allow access to /nuevo
-    // We'll handle the redirect logic in the page component
-    console.log(`User ${userEmail} accessing /nuevo - allowing access`);
-  }
-
-  // Check if user is trying to access /u (main user dashboard)
-  if (pathname === "/u") {
-    // For now, always redirect to /nuevo if user hasn't applied
-    // This is a temporary fix until we resolve the API call issue
-    console.log(`User ${userEmail} accessing /u - redirecting to /nuevo`);
-    return NextResponse.redirect(new URL("/nuevo", request.nextUrl.origin));
+  // Check application status for specific routes
+  if (pathname === "/nuevo" || pathname === "/u") {
+    const hasApplied = await checkUserApplicationStatus(userEmail);
+    
+    if (pathname === "/nuevo" && hasApplied) {
+      // User has applied, redirect to /u
+      return NextResponse.redirect(new URL("/u", request.nextUrl.origin));
+    }
+    
+    if (pathname === "/u" && !hasApplied) {
+      // User hasn't applied, redirect to /nuevo
+      return NextResponse.redirect(new URL("/nuevo", request.nextUrl.origin));
+    }
   }
 
   return NextResponse.next();
@@ -66,14 +66,9 @@ async function checkUserApplicationStatus(email: string): Promise<boolean> {
       },
     });
 
-    console.log('API Response status:', response.status);
-    
     if (response.ok) {
       const data = await response.json();
-      console.log('API Response data:', data);
       return data.hasApplied;
-    } else {
-      console.log('API Response error:', await response.text());
     }
   } catch (error) {
     console.error('Error checking user application status:', error);

@@ -1,38 +1,25 @@
-'use client'
-
-import { useEffect } from "react"
-import { useSession } from "next-auth/react"
+import { redirect } from "next/navigation"
+import { auth } from "@/auth"
+import { getUserApplicationStatus } from "@/services/users/application-status"
 import Container from "@/components/atoms/container"
 import Logo from "@/components/atoms/logo"
 import SignUpForm from "@/components/templates/sign-up-form"
 
-export default function NewUserPage() {
-  const { data: session, status } = useSession()
+export default async function NewUserPage() {
+  // Get session on server side
+  const session = await auth()
+  
+  if (!session?.user?.email) {
+    // If not authenticated, redirect to sign in
+    redirect('/api/auth/signin')
+  }
 
-  useEffect(() => {
-    if (status === "loading") return
-
-    if (session?.user?.email) {
-      // Check if user has already applied
-      checkUserApplicationStatus(session.user.email)
-    }
-  }, [session, status])
-
-  const checkUserApplicationStatus = async (email: string) => {
-    try {
-      const response = await fetch(`/api/user/application-status?email=${encodeURIComponent(email)}`)
-      
-      if (response.ok) {
-        const data = await response.json()
-        
-        if (data.hasApplied) {
-          // User has already applied, redirect to /u
-          window.location.href = "/u"
-        }
-      }
-    } catch (error) {
-      console.error("Error checking application status:", error)
-    }
+  // Check if user has already applied
+  const applicationStatus = await getUserApplicationStatus(session.user.email)
+  
+  if (applicationStatus.hasApplied) {
+    // User has already applied, redirect to /u
+    redirect('/u')
   }
 
   return (
